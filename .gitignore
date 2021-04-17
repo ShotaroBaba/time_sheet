@@ -1,0 +1,5 @@
+app
+.env
+data
+logs
+config
