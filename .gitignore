@@ -3,3 +3,7 @@ app
 data
 logs
 config
+test_data
+.mysql_secrets
+mysql_secrets
+decrypt_script

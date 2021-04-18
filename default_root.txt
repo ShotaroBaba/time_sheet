@@ -1,0 +1,5 @@
+[client]
+user=root
+password=yesterday
+host=mysql_server
+port=3306
