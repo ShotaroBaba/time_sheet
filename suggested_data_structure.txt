@@ -1,0 +1,28 @@
+# The suggested data structure below is created using the tools provided by https://dbdiagram.io/
+# If you want a visual table structure of this, please go to https://dbdiagram.io/d/607d2cacb29a09603d110b81
+
+table user {
+  user_id int [pk]
+  firstname varchar [not null]
+  middlename varchar
+  lastname varchar [not null]
+  address varchar [not null]
+  email varchar [not null]
+}
+
+table time_sheet {
+  time_id int [pk]
+  user_id int [not null]
+  time datetime [not null]
+  state varchar [not null] 
+}
+
+table user_password {
+  user_id int 
+  salt varchar(50) [not null]
+  password varchar(256) [not null]
+}
+
+Ref: "user_password"."user_id" - "user"."user_id"
+
+Ref: "user"."user_id" < "time_sheet"."user_id"

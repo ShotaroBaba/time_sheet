@@ -1,0 +1,64 @@
+version: '3.3'
+
+services:
+
+  webserver:
+    build:
+      context: ./php_dock
+    container_name: 'php_apache'
+    restart: 'unless-stopped'
+  #   restart: 'unless-stopped'
+    ports:
+      - "127.0.0.1:${HTTP_PORT}:80"
+      - "127.0.0.1:${HTTPS_PORT}:443"
+    links:
+      - mysql_server
+    volumes:
+      - ./www:/var/www/html
+      - ./config/php/php.ini:/usr/local/etc/php/php.ini
+      - ./config/vhosts:/etc/apache2/sites-enabled
+      - ./logs/apache2:/var/log/apache2
+    environment:
+      APACHE_DOCUMENT_ROOT: /var/www/html
+  
+  mysql_server:
+    build:
+      context: ./mysql_dock
+    container_name: 'mysql_server_shotaro'
+    restart: 'unless-stopped'
+    ports:
+      - "127.0.0.1:${MYSQL_PORT}:3306"
+    volumes:
+      # Store mysql data
+      - ./data/mysql:/var/lib/mysql
+      # Store mysql logs
+      - ./logs/mysql:/var/log/mysql
+      # Store test data
+      - ./test_data:/test_data
+      # Store secret data such as passwords.
+      - ./.mysql_secrets:/.mysql_secrets
+
+    # WARNING: CHANGE PASSWORD BEFORE YOU INPUT YOUR DATA!
+    environment:
+      # NOTE: IMMEDIATELY CHANGE THIS PASSWORD AFTER CREATING YOUR INSTANCE! # It is done by ALTER USER 'root'@'%' IDENTIFIED BY
+      # mysql_native_password BY '[your-password]'
+      MYSQL_ONETIME_PASSWORD: 'yes'
+      MYSQL_ROOT_PASSWORD: 'yesterday'
+      # NOTE: CHANGE THIS PASSWORD AFTER CREATING YOUR INSTANCE! # It is done by issuing ALTER USER admin@'%' IDENTIFIED BY
+      # mysql_native_password BY '[your-password]'
+      MYSQL_USER: "${MYSQL_ADMIN_USER}"
+      MYSQL_PASSWORD: "${MYSQL_ADMIN_PASSWORD}"
+      MYSQL_DATABASE: "${MYSQL_ADMIN_DATABASE}"
+
+  mysql_viewer:
+    build: 
+      context: ./phpmyadmin_dock
+    container_name: 'mysql_phpmyadmin'
+    restart: 'unless-stopped'
+    links: 
+      - mysql_server
+    ports:
+      - "127.0.0.1:${PHPMYADMIN_PORT}:80"
+    environment:
+      PMA_HOST: mysql_server
+      PMA_PORT: 3306
