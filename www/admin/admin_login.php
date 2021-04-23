@@ -1,0 +1,1 @@
+<!-- No Registration for admin -->
