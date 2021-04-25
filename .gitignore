@@ -8,3 +8,4 @@ test_data
 mysql_secrets
 decrypt_script
 create_database.sh
+.vscode

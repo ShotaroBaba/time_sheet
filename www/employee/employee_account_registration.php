@@ -7,7 +7,7 @@
 
 <div class="container align-items-center">
 
-  <form id ="userInputMain" class="d-flex row justify-content-center">
+  <form id ="userInputMain" method="POST" onsubmit="return registerUser()" action="/employee/employee_account_registration_summary.php" class="d-flex row justify-content-center">
     <div class="form-group  col-sm-10">
       <label for="employeeFirstName">First Name</label>
       <input type="text" id="employeeFirstName" name="employeeFirstName" class="form-control" placeholder="*Required">
@@ -30,15 +30,29 @@
     </div>
     <div class="form-group  col-sm-10">
       <label for="employeePhoneNumber">Phone Number</label>
-      <input type="text" id="employeePhoneNumber" name="employeePhoneNumber" class="form-control" placeholder="*Required">
+      <input type="text" id="employeePhoneNumber" name="employeePhoneNumber" class="form-control" value="fffff" placeholder="*Required">
     </div>
     <div class="form-group  col-sm-10">
       <label for="employeeEmail">Email</label>
       <input type="text" id="employeeEmail" name="employeeEmail" class="form-control" placeholder="*Required">
     </div>
     <br><br><br>
+    <div class="col-sm-10">
+      <hr/>
+    </div>
+    <br><br><br>
+
+    <div class="form-group  col-sm-10">
+      <label for="employeePassword">Password</label>
+      <input type="password" id="employeePassword" name="employeePassword" class="form-control" placeholder="*Password (Only alpha-numerical characters are accepted)">
+    </div>
+    <div class="form-group  col-sm-10">
+      <label for="employeePasswordRetype">Re-type Password</label>
+      <input type="password" id="employeePasswordRetype" name="employeePasswordRetype" class="form-control" placeholder="Retype Password">
+    </div>
+
     <div  class="d-flex justify-content-center">
-      <button type="button" onclick="registerUser()" class="btn btn-primary">Submit</button>
+      <button class="btn btn-primary">Submit</button>
     </div>
     <div  class="d-flex justify-content-center">
       <span id="errorMessage" class='error-message'></span>
