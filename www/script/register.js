@@ -1,6 +1,9 @@
 // Check user's input & send it to a php file dealing with them
 // Check the info of account registration.
 
+passwordFormat=/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)[A-Za-z\d]{8,}$/
+illegalPasswordFormat=/[^A-Za-z0-9]+/
+
 function registerUser() {
 
     htmlStr="";
@@ -31,15 +34,23 @@ function registerUser() {
         htmlStr+="Please input your password.<br>"
     }
 
-    if($("#employeePassword").val() && !$("#employeePasswordRetype").val()){
+    else if($("#employeePassword").val() && !$("#employeePasswordRetype").val()){
         htmlStr+="Please re-type the same password for confirmation.<br>"
     }
 
-    if($("#employeePassword").val() !== $("#employeePasswordRetype").val()){
+    else if($("#employeePassword").val() !== $("#employeePasswordRetype").val()){
         htmlStr+="Password does not match"
     }
-    // ********* User's validation end. ********
+    
+    // Check if password satisfies the specific formats.
+    else if(!passwordFormat.test($("#employeePassword").val())){
+        htmlStr+="Password must contains at least one lower-case alphabet, one uppacase-alphabet and one numeric number, and needs to be 8 character length.<br>"
+    }
+    else if(illegalPasswordFormat.test($("#employeePassword").val())){
+        htmlStr+="Password contains special characters. It needs to have only lower-case alphabet, uppacase-alphabet and one numeric number.<br>"
+    }
 
+    // ********* Validation end. ********
 
     if(!htmlStr){
        return true;

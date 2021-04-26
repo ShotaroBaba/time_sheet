@@ -18,6 +18,7 @@ CREATE TABLE `time_sheet` (
   `state` varchar(255) NOT NULL
 );
 
+-- Different salt is created for different users.
 CREATE TABLE `user_password` (
   `user_id` int,
   `salt` varchar(50) NOT NULL,

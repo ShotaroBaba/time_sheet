@@ -48,7 +48,7 @@
     </div>
     <div class="form-group  col-sm-10">
       <label for="employeePasswordRetype">Re-type Password</label>
-      <input type="password" id="employeePasswordRetype" name="employeePasswordRetype" class="form-control" placeholder="Retype Password">
+      <input type="password" id="employeePasswordRetype" class="form-control" placeholder="Retype Password">
     </div>
 
     <div  class="d-flex justify-content-center">

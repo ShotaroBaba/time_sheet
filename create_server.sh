@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # TODO: Enable software backup
-read -p "Would you like to create your server? Before you create your server, if you have your server data already, then make sure that you make a backup your database. Otherwise, you will lose all of your data![y/n]: " yn 
+read -p "Would you like to create your server? Before you create your server, if you have your server data already, then make sure that you make a backup of your database. Otherwise, you will lose all of your data![y/n]: " yn 
 
 case $yn in
     [Yy])
