@@ -3,11 +3,12 @@
 
 table user {
   user_id int [pk]
-  firstname varchar [not null]
-  middlename varchar
-  lastname varchar [not null]
-  address varchar [not null]
-  email varchar [not null]
+  firstname varchar(1024) [not null]
+  middlename varchar(1024)
+  lastname varchar(1024) [not null]
+  phone_number varchar(128) [not null]
+  address varchar(1024) [not null]
+  email varchar(1024) [not null]
 }
 
 table time_sheet {
@@ -19,7 +20,7 @@ table time_sheet {
 
 table user_password {
   user_id int 
-  salt varchar(50) [not null]
+  salt varchar(64) [not null]
   password varchar(256) [not null]
 }
 

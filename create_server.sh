@@ -41,7 +41,7 @@ pub_key=$key_dir/pub_$rsa_key_root_name.pem
 priv_key=$key_dir/priv_$rsa_key_root_name.pem
 encrypted_pass=$pass_dir/root_pass_$rsa_key_root_name.txt.enc
 encrypted_admin_pass=$pass_dir/admin_pass_$rsa_key_root_name.txt.enc
-
+encrypted_table_manager_pass=$pass_dir/table_manager_$rsa_key_root_name.txt.enc
 # Generate rsa
 sudo openssl genrsa -out $priv_key
 sudo openssl rsa -in $priv_key -pubout -out $pub_key
@@ -54,11 +54,15 @@ sleep 45
 sudo openssl rand -base64 32 | sudo openssl rsautl -encrypt -pubin -inkey $pub_key -out $encrypted_pass
 # sudo openssl rsautl -decrypt -inkey $priv_key -in $encrypted_pass
 
-#pass_str=$(sudo docker exec mysql_server_shotaro bash -c "mysql --defaults-extra-file=/.mysql_secrets/default_root.txt")
+#pass_str=$(sudo docker exec mysql_server bash -c "mysql --defaults-extra-file=/.mysql_secrets/default_root.txt")
 
+# Alter default admin user priviledge
+# sudo docker exec mysql_server \
+# bash -c "mysql --defaults-extra-file=/.mysql_secrets/default_root.txt \
+#  --connect-expired-password -e \"REVOKE ALL PRIVILEGES ON *.* FROM 'admin'@'%'; GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, RELOAD, PROCESS, FILE, REFERENCES, INDEX, ALTER, SHOW DATABASES, CREATE TEMPORARY TABLES, LOCK TABLES, CREATE VIEW, EVENT, TRIGGER, SHOW VIEW, CREATE ROUTINE, ALTER ROUTINE, CREATE USER, EXECUTE ON *.* TO 'admin'@'%' REQUIRE NONE WITH GRANT OPTION MAX_QUERIES_PER_HOUR 0 MAX_CONNECTIONS_PER_HOUR 0 MAX_UPDATES_PER_HOUR 0 MAX_USER_CONNECTIONS 0;\""
 
 # Change root password.
-sudo docker exec mysql_server_shotaro \
+sudo docker exec mysql_server \
 bash -c "mysql --defaults-extra-file=/.mysql_secrets/default_root.txt \
 --connect-expired-password -e  \"ALTER USER 'root'@'%' IDENTIFIED WITH mysql_native_password \
 BY '"$(sudo openssl rsautl -decrypt -inkey $priv_key -in $encrypted_pass)"';\""
@@ -67,10 +71,13 @@ BY '"$(sudo openssl rsautl -decrypt -inkey $priv_key -in $encrypted_pass)"';\""
 sudo openssl rand -base64 32 | sudo openssl rsautl -encrypt -pubin -inkey $pub_key -out $encrypted_admin_pass
 
 # Now change admin password.
-sudo docker exec mysql_server_shotaro \
+sudo docker exec mysql_server \
 bash -c "mysql --defaults-extra-file=/.mysql_secrets/default_admin.txt \
  -e \"ALTER USER 'admin'@'%' IDENTIFIED WITH mysql_native_password \
 BY '"$(sudo openssl rsautl -decrypt -inkey $priv_key -in $encrypted_admin_pass)"';\""
+
+# Create password for a table manager.
+sudo openssl rand -base64 32 | sudo openssl rsautl -encrypt -pubin -inkey $pub_key -out $encrypted_table_manager_pass
 
 # After reading all files, the program wiil change permission.
 # Only root can read and all of the files below are read-only states.
@@ -87,9 +94,24 @@ fi
 # in such a way that anyone can see it.
 echo "openssl rsautl -decrypt -inkey '$priv_key' -in '$encrypted_pass'" > decrypt_script/root_decrypt.sh
 echo "openssl rsautl -decrypt -inkey '$priv_key' -in '$encrypted_pass' | xclip -sel clip" > decrypt_script/root_decrypt_clip.sh
+
 echo "openssl rsautl -decrypt -inkey '$priv_key' -in '$encrypted_admin_pass'" > decrypt_script/admin_decrypt.sh
 echo "openssl rsautl -decrypt -inkey '$priv_key' -in '$encrypted_admin_pass' | xclip -sel clip" > decrypt_script/admin_decrypt_clip.sh
+
+echo "openssl rsautl -decrypt -inkey '$priv_key' -in '$encrypted_table_manager_pass'" > decrypt_script/admin_decrypt.sh
+echo "openssl rsautl -decrypt -inkey '$priv_key' -in '$encrypted_table_manager_pass' | xclip -sel clip" > decrypt_script/admin_decrypt_clip.sh
+
 find decrypt_script -name '*.sh' | while read p; do chmod 500 $p; done
 echo "root_decrypt.sh, root_decrypt_clip.sh, admin_decrypt.sh and admin_decrypt_clip.sh are created for your password decryption."
 echo "All of the created scripts need to be run with root privileges."
 echo "All setups done!"
+
+# TODO: Put a script that creates a database for a user.
+sudo docker exec mysql_server \
+bash -c "mysql -uroot -hmysql_server -p"$(sudo decrypt_script/root_decrypt.sh)" \
+ -e \"REVOKE ALL PRIVILEGES ON *.* FROM 'admin'@'%'; GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, RELOAD, PROCESS, FILE, REFERENCES, INDEX, ALTER, SHOW DATABASES, CREATE TEMPORARY TABLES, LOCK TABLES, CREATE VIEW, EVENT, TRIGGER, SHOW VIEW, CREATE ROUTINE, ALTER ROUTINE, CREATE USER, EXECUTE ON *.* TO 'admin'@'%' REQUIRE NONE WITH GRANT OPTION MAX_QUERIES_PER_HOUR 0 MAX_CONNECTIONS_PER_HOUR 0 MAX_UPDATES_PER_HOUR 0 MAX_USER_CONNECTIONS 0;\""
+
+# Create a password manager taht 
+sudo docker exec mysql_server \
+bash -c "mysql -uroot -hmysql_server -p"$(sudo decrypt_script/root_decrypt.sh)" \
+ -e \"CREATE USER IF NOT EXISTS 'time_sheet_manager' IDENTIFIED WITH mysql_native_password BY '"$(sudo openssl rsautl -decrypt -inkey $priv_key -in $encrypted_table_manager_pass)"'\""
