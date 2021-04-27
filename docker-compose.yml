@@ -7,7 +7,6 @@ services:
       context: ./php_dock
     container_name: 'php_apache'
     restart: 'unless-stopped'
-  #   restart: 'unless-stopped'
     ports:
       - "127.0.0.1:${HTTP_PORT}:80"
       - "127.0.0.1:${HTTPS_PORT}:443"
@@ -24,7 +23,7 @@ services:
   mysql_server:
     build:
       context: ./mysql_dock
-    container_name: 'mysql_server_shotaro'
+    container_name: 'mysql_server'
     restart: 'unless-stopped'
     ports:
       - "127.0.0.1:${MYSQL_PORT}:3306"
