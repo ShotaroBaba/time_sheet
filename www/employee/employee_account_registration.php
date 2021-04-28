@@ -1,4 +1,6 @@
 <!-- Load css files. -->
+
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 <link href='/css/bootstrap.min.css' rel='stylesheet'>
 <link href='/css/index.css' rel='stylesheet'>
 <script src="/script/jquery-3.6.0.min.js"></script>
@@ -7,7 +9,11 @@
 
 <div class="container align-items-center">
 
-  <form id ="userInputMain" method="POST" onsubmit="return registerUser()" action="/employee/employee_account_registration_summary.php" class="d-flex row justify-content-center">
+  <form id ="userInputMain" method="POST" 
+  onsubmit="return registerUser()" 
+  action="/employee/employee_account_registration_summary.php" 
+  class="d-flex row justify-content-center"
+  enctype="multipart/form-data" accept-charset="UTF-8">
     <div class="form-group  col-sm-10">
       <label for="employeeFirstName">First Name</label>
       <input type="text" id="employeeFirstName" name="employeeFirstName" class="form-control" placeholder="*Required">

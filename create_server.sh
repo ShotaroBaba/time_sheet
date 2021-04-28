@@ -77,7 +77,10 @@ bash -c "mysql --defaults-extra-file=/.mysql_secrets/default_admin.txt \
 BY '"$(sudo openssl rsautl -decrypt -inkey $priv_key -in $encrypted_admin_pass)"';\""
 
 # Create password for a table manager.
-sudo openssl rand -base64 32 | sudo openssl rsautl -encrypt -pubin -inkey $pub_key -out $encrypted_table_manager_pass
+# sudo openssl rand -hex 48 | sudo openssl rsautl -encrypt -pubin -inkey $pub_key -out $encrypted_table_manager_pass
+
+# This script is for testing purpose.
+echo "_____time_sheet_pass_____" | sudo openssl rsautl -encrypt -pubin -inkey $pub_key -out $encrypted_table_manager_pass
 
 # After reading all files, the program wiil change permission.
 # Only root can read and all of the files below are read-only states.

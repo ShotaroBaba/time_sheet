@@ -18,12 +18,12 @@ table time_sheet {
   state varchar [not null] 
 }
 
-table user_password {
+table user_secret {
   user_id int 
   salt varchar(64) [not null]
   password varchar(256) [not null]
 }
 
-Ref: "user_password"."user_id" - "user"."user_id"
+Ref: "user_secret"."user_id" - "user"."user_id"
 
 Ref: "user"."user_id" < "time_sheet"."user_id"
