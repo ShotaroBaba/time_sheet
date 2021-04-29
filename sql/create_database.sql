@@ -38,9 +38,10 @@ CREATE TABLE IF NOT EXISTS `user_secret` (
 );
 
 ALTER TABLE `user_secret` ADD FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`);
-
 ALTER TABLE `time_sheet_table` ADD FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`);
 
-GRANT SELECT, INSERT ON `time_sheet`.* TO 'time_sheet_manager'@'%';
+-- Change users' database permissions
+GRANT SELECT, INSERT ON `time_sheet`.* TO 'time_sheet_client'@'%';
+GRANT ALL PRIVILEGES ON `time_sheet`.* TO 'time_sheet_admin'@'%' WITH GRANT OPTION;
 
 COMMIT;

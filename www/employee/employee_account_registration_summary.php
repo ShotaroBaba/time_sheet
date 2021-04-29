@@ -10,10 +10,6 @@ session_start([
 ]);
 session_regenerate_id(true);
 
-// In case of duplication.
-unset($_SESSION);
-$_SESSION=array();
-
 // print_r($_COOKIE);
 # Insert ip & user agent to see if 
 # a user is the same user he / she access to this website 

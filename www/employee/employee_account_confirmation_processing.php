@@ -6,7 +6,7 @@
 header("Content-Type: text/html;charset=UTF-8");
 error_reporting(E_ALL ^ E_WARNING ^ E_NOTICE);
 
-include "/var/www/html/.secret/variables.php";
+include "/var/www/html/.secret/.config.php";
 
 require_once("/var/www/html/plugin/strip_malicious_character.php");
 // TODO: Enable random pepper generation when 
@@ -32,12 +32,9 @@ if ($_SERVER['HTTP_USER_AGENT'] != $_SESSION['useragent'])
 try {
 
   $conn = new PDO("mysql:host=$host;dbname=$db;charset=utf8mb4", $user, $pass);
-  // set the PDO error mode to exception
-  $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
   
-  // TODO: Before inputting a detail, 
-  // the existence of the 
-  // Establish database connection.
+  // Toggle an error mode to exception
+  $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
   //*********************************** */
   //** Insert user info *************** */
@@ -109,7 +106,7 @@ try {
     `verified`,
     `password`)
   VALUES
-  (:user_id, :salt, :email_verification_token, 0, :_password);");
+  (:user_id, :salt, :email_verification_token, 1, :_password);");
 
   $salt=bin2hex(openssl_random_pseudo_bytes(16));
   $email_verification_token=bin2hex(openssl_random_pseudo_bytes(64));
@@ -138,8 +135,7 @@ try {
   $_SESSION['user_info']['employeeEmailToken']=$email_verification_token;
 
 } catch(PDOException $e) {
-  // TODO: If a user inputs a record that is the same name & phone number
-  // then, a website will jump to a specific page indicating that an duplication occured.
+  
   http_response_code(500);
   echo "Unkonwn error";
 
