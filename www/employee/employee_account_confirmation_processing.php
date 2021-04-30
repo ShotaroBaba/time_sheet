@@ -80,8 +80,6 @@ try {
   //*********************************** */
   
 
-
-  //*********************************** */
   //*********************************** */
   // Fetch user_id AFTER insert an user's info. */
   //*********************************** */
@@ -129,13 +127,14 @@ try {
 
   $insert_pass_prepare->execute();
   $insert_pass_prepare=NULL;
+
   //*********************************** */
   //*********************************** */
 
-  $_SESSION['user_info']['employeeEmailToken']=$email_verification_token;
+  // Email verification completed.
 
 } catch(PDOException $e) {
-  
+
   http_response_code(500);
   echo "Unkonwn error";
 

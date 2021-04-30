@@ -8,6 +8,7 @@ $user = 'time_sheet_client';
 // by executing the create_server.sh script.
 $pass   = '_____time_sheet_pass_____';
 $pepper = '_____pepper_string_____';
+$error_message = "Unknown error."
 
 $charset = 'utf8mb4';
 ?>

@@ -50,6 +50,19 @@ function registerUser() {
         htmlStr+="Password contains special characters. It needs to have only lower-case alphabet, uppacase-alphabet and one numeric number.<br>"
     }
 
+    // Make ajax call to see if there is an error.
+    // Check all account info.
+    $.ajax({
+            async: false,
+            data: {},
+            dataType: "JSON",
+            url: "employee/check_user_input.php",
+            method: "POST",
+            success: function(data) {
+                return data;
+            }
+        }
+    )
     // ********* Validation end. ********
 
     if(!htmlStr){

@@ -14,8 +14,10 @@ CREATE TABLE IF NOT EXISTS `user` (
   `last_name` varchar(128) NOT NULL,
   `address` varchar(256) NOT NULL,
   `phone_number` varchar(48) NOT NULL,
+  `employee_type_id` INT DEFAULT 1 NOT NULL,
   `email` varchar(128) NOT NULL,
-  UNIQUE (`first_name`, `middle_name`, `last_name`, `phone_number`)
+  UNIQUE (`first_name`, `middle_name`, `last_name`, `phone_number`),
+  UNIQUE (`email`)
 );
 
 CREATE TABLE IF NOT EXISTS `time_sheet_table` (
@@ -25,6 +27,18 @@ CREATE TABLE IF NOT EXISTS `time_sheet_table` (
   `state` varchar(16) NOT NULL,
   PRIMARY KEY (`time_id`)
 );
+
+CREATE TABLE IF NOT EXISTS `occupation` (
+  `employee_type_id` INT auto_increment,
+  `occupation_type` varchar(64) NOT NULL,
+  `wage` INT NOT NULL,
+  PRIMARY KEY (`employee_type_id`),
+  UNIQUE(`occupation_type`)
+);
+
+-- Insert default 
+INSERT INTO `occupation` (`occupation_type`,
+            `wage`) VALUES ('OCCUPATION_NOT_SELECTED', 0);
 
 -- Different salt is created for different users.
 CREATE TABLE IF NOT EXISTS `user_secret` (
@@ -39,6 +53,7 @@ CREATE TABLE IF NOT EXISTS `user_secret` (
 
 ALTER TABLE `user_secret` ADD FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`);
 ALTER TABLE `time_sheet_table` ADD FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`);
+ALTER TABLE `user` ADD FOREIGN KEY (`employee_type_id`) REFERENCES `occupation` (`employee_type_id`);
 
 -- Change users' database permissions
 GRANT SELECT, INSERT ON `time_sheet`.* TO 'time_sheet_client'@'%';
