@@ -29,6 +29,21 @@ if ($_SERVER['HTTP_USER_AGENT'] != $_SESSION['useragent'])
   session_destroy();
 }
 
+// Check session info is not empty. A user is not allow to 
+// re input his/her own info again.
+if(
+   empty($_SESSION) ||
+   empty($_SESSION['user_info']['employeeFirstName']) || 
+   empty($_SESSION['user_info']['employeeLastName']) ||
+   empty($_SESSION['user_info']['employeeAddress']) || 
+   empty($_SESSION['user_info']['employeePhoneNumber']) ||
+   empty($_SESSION['user_info']['employeeEmail']) ||
+   empty($_SESSION['user_info']['employeePassword'])) 
+  {
+    echo "Unknown error.";
+    die;
+  }
+
 try {
 
   $conn = new PDO("mysql:host=$host;dbname=$db;charset=utf8mb4", $user, $pass);
