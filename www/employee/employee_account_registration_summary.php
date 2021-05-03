@@ -37,7 +37,7 @@ if( !preg_match($password_format,$_POST["employeePassword"]) ||
 // re input his/her own info again.
 if(
   empty($_POST) ||
-  empty($_POST)['employeeFirstName']) || 
+  empty($_POST['employeeFirstName']) || 
   empty($_POST['employeeLastName']) ||
   empty($_POST['employeeAddress']) || 
   empty($_POST['employeePhoneNumber']) ||
