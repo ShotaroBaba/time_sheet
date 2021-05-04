@@ -35,7 +35,8 @@ try {
   }
   
   $check_email_address_prepare=NULL;
-  echo "okay";
+  echo "{'email':$is_email_exist,
+  'account':$is_name_phone_exist}";
 
 }
 
