@@ -145,6 +145,8 @@ try {
 
   //*********************************** */
   //*********************************** */
+  // Finish the connection.
+  $conn=NULL;
 
   // Email verification completed.
 
