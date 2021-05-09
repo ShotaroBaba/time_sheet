@@ -60,14 +60,17 @@ try {
     $is_name_phone_exist=true;
   }
 
-  echo "{'email':$is_email_exist,
-  'account':$is_name_phone_exist}";
+  $output=array();
+  $output['is_email_exist']=$is_email_exist;
+  $output['is_name_phone_exist']=$is_name_phone_exist;
+  echo json_($output);
 
+  // Jump to this code if the SQL omits an error when being executed.
   disconnect_database:
   $check_email_address_prepare=NULL;
   $check_user_name_phone_prepare=NULL;
   $conn=NULL;
-  die;
+  exit(0);
 
 }
 
