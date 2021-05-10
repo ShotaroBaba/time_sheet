@@ -63,7 +63,7 @@ try {
   $output=array();
   $output['is_email_exist']=$is_email_exist;
   $output['is_name_phone_exist']=$is_name_phone_exist;
-  echo json_($output);
+  echo json_encode($output);
 
   // Jump to this code if the SQL omits an error when being executed.
   disconnect_database:
