@@ -24,7 +24,6 @@ try {
   FROM `user` WHERE
   `email` = :_email;");
 
-  // $check_email_address_prepare->bindValue(":_email", htmlspecialchars($_POST['employeeEmail']), PDO::PARAM_STR);
   $check_email_address_prepare->bindValue(":_email", htmlspecialchars($_POST['employeeEmail']), PDO::PARAM_STR);
 
 

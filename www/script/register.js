@@ -54,12 +54,17 @@ function registerUser() {
     // Check all account info.
     $.ajax({
             async: false,
-            data: {},
+            data: {
+                "employeeFirstName": $("#employeeFirstName").val(),
+                "employeeMiddleName": $("#employeeMiddleName").val(),
+                "employeeLastName": $("#employeeLastName").val(),
+                "employeeEmail": $("#employeeEmail").val()
+            },
             dataType: "JSON",
-            url: "employee/check_user_input.php",
+            url: "check_user_input.php",
             method: "POST",
             success: function(data) {
-                return data;
+                console.log(data);
             }
         }
     )
