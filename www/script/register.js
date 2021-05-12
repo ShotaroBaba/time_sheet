@@ -65,6 +65,9 @@ function registerUser() {
             method: "POST",
             success: function(data) {
                 console.log(data);
+                if (data['is_email_exist'] || data['is_name_phone_exist']) {
+                    return false;
+                }
             }
         }
     )
