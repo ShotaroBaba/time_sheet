@@ -58,6 +58,7 @@ function registerUser() {
                 "employeeFirstName": $("#employeeFirstName").val(),
                 "employeeMiddleName": $("#employeeMiddleName").val(),
                 "employeeLastName": $("#employeeLastName").val(),
+                "employeePhoneNumber": $("#employeePhoneNumber").val(),
                 "employeeEmail": $("#employeeEmail").val()
             },
             dataType: "JSON",
