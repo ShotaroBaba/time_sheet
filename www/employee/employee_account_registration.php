@@ -7,8 +7,17 @@
 <!-- Load script for registration -->
 <script src="/script/register.js"></script>
 
-<div class="container align-items-center">
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <div class="container align-items-center">
   <form id ="userInputMain" method="POST" 
   onsubmit="return registerUser()" 
   action="/employee/employee_account_registration_summary.php" 
@@ -64,4 +73,6 @@
       <span id="errorMessage" class='error-message'></span>
     </div>
   </form>
-</div>
+  </div>
+</body>
+</html>
