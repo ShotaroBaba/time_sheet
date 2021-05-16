@@ -27,10 +27,10 @@ function _registerUser() {
 }
 
 function registerUser(){
+    
     htmlStr="";
     $.when(_registerUser()).done(function(data) {
         
-
         // If data already exists in database.
         if (data['is_email_exist']) {
             htmlStr+="Email has already been registered.";
@@ -81,15 +81,14 @@ function registerUser(){
         else if(illegalPasswordFormat.test($("#employeePassword").val())){
             htmlStr+="Password contains special characters. It needs to have only lower-case alphabet, uppacase-alphabet and one numeric number.<br>"
         }
-        $('#errorMessage').html(htmlStr);
-    });
+        
+        if(!htmlStr){
+            $('#userInputMain').submit();
+        }
+        else
+        {
+            $('#errorMessage').html(htmlStr);
+        }
 
-    // ********* Validation end. ********
-    if(!htmlStr){
-        return false;
-    }
-    else
-    {
-        return true;
-    }
+    })
 };

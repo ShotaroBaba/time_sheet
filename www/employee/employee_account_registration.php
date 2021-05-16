@@ -14,12 +14,11 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
+  <title>Employee Registration</title>
 </head>
 <body>
   <div class="container align-items-center">
-  <form id ="userInputMain" method="POST" 
-  onsubmit="return registerUser()" 
+  <form id ="userInputMain" method="POST"  
   action="/employee/employee_account_registration_summary.php" 
   class="d-flex row justify-content-center"
   enctype="multipart/form-data" accept-charset="UTF-8">
@@ -67,7 +66,7 @@
     </div>
 
     <div  class="d-flex justify-content-center">
-      <button class="btn btn-primary">Submit</button>
+      <button type="button" onclick="registerUser()" class="btn btn-primary">Submit</button>
     </div>
     <div  class="d-flex justify-content-center">
       <span id="errorMessage" class='error-message'></span>
