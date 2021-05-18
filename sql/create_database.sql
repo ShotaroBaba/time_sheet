@@ -29,6 +29,15 @@ CREATE TABLE IF NOT EXISTS `time_sheet_table` (
   PRIMARY KEY (`time_id`)
 );
 
+-- Check user access history and put it on the record.
+-- random pseudo id is generated using PHP random function
+CREATE TABLE IF NOT EXISTS `user_log` (
+  `session_id` VARCHAR(256) NOT NULL,
+  `user_id` BIGINT NOT NULL,
+  `login_time`  DATETIME NOT NULL,
+  `url` TEXT NOT NULL
+)
+
 CREATE TABLE IF NOT EXISTS `occupation` (
   `employee_type_id` INT auto_increment,
   `occupation_type` VARCHAR(64) NOT NULL,

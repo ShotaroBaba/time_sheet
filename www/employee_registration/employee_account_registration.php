@@ -19,7 +19,7 @@
 <body>
   <div class="container align-items-center">
   <form id ="userInputMain" method="POST"  
-  action="/employee/employee_account_registration_summary.php" 
+  action="/employee_registration/employee_account_registration_summary.php" 
   class="d-flex row justify-content-center"
   enctype="multipart/form-data" accept-charset="UTF-8">
     <div class="form-group  col-sm-10">

@@ -83,13 +83,13 @@ $_SESSION["user_info"]=$_POST;
   <div  class="d-flex justify-content-center">
     <div class="col-auto mx-3">
       <!-- Proceed to the output. -->
-      <button class="btn btn-primary" onclick="window.location='/employee/employee_account_confirmation_processing.php'">
+      <button class="btn btn-primary" onclick="window.location='/employee_registration/employee_account_confirmation_processing.php'">
         Confirm 
       </button>
     </div>    
     <div class="col-auto mx-3">
     <!-- Go back to the previous page. -->
-      <button class="btn btn-primary" onclick="window.location='/employee/employee_account_registration.php'">
+      <button class="btn btn-primary" onclick="window.location='/employee_registration/employee_account_registration.php'">
       Back 
       </button>
     </div>
