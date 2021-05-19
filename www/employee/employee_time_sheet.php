@@ -7,127 +7,62 @@ include "/var/www/html/.secret/.config.php";
 
 require_once("/var/www/html/plugin/strip_malicious_character.php");
 
+session_name('user_cookie');
+session_start();
+
+// If this session value becomes empty.
+// then a user will move on to the top page.
+if(empty($_SESSION)){
+  session_unset();
+  session_destroy();
+}
+
+// For preventing session hijacking.
+if ($_SERVER['REMOTE_ADDR'] != $_SESSION['ipaddress'])
+{
+  session_unset();
+  session_destroy();
+}
+
+if ($_SERVER['HTTP_USER_AGENT'] != $_SESSION['useragent'])
+{
+  session_unset();
+  session_destroy();
+}
+
 // Get email & password for login.
 $user_email=htmlspecialchars($_POST['employeeLoginIDInput']);
 $password_char=htmlspecialchars($_POST['employeeLoginPasswordInput']);
 
+
+// If a user remains inactive for a certain time, then
+// a user will automatically be logged out.
 try {
-  
-  // Check user input twice to prevent the attack
-  // done by modifying javascript.
+  // Get user info from a user_id;
+  $conn = new PDO("mysql:host=$host;dbname=$db;charset=utf8mb4", $user, $pass);
+  $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-  // If a cookie does not exist, then set the cookie for a user.
-  if(!$_SESSION 
-  || !$_SESSION['employee_cookie']
-  || ($_SERVER['REMOTE_ADDR'] != $_SESSION['ipaddress'])
-  || ($_SERVER['HTTP_USER_AGENT'] != $_SESSION['useragent'])) {
+  $insert_user_log_prepare=
+  $conn->prepare("INSERT INTO `user_log` (`session_id`,
+  `user_id`,
+  `login_time`,
+  `url`)
+  VALUES
+  (:_session_id, :_user_id, SYSDATE(6), :_url);");
 
-    $conn = new PDO("mysql:host=$host;dbname=$db;charset=utf8mb4", $user, $pass);
-    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    
-    // Check whether a user has logged in with his/her user account.
-    $check_email_address_prepare=
-    $conn->prepare("SELECT COUNT(`email`) as email_count
-    FROM `user` WHERE
-    `email` = :_email;");
-  
-    $check_email_address_prepare->bindValue(":_email", $user_email , PDO::PARAM_STR);
-  
-    if($check_email_address_prepare->execute() < 1){
-      echo "Unknown error";
-      
-      $conn=NULL;
-      $get_user_secret_prepare=NULL;
-      $get_user_id_prepare=NULL;
-      $check_email_address_prepare=NULL;
-      exit(1);
-    }
-  
-    if($check_email_address_prepare->fetch(PDO::FETCH_ASSOC)['email_count'] < 1) {
-      echo "Unknown error";
+  $insert_user_log_prepare->bindValue(":_session_id", htmlspecialchars($_SESSION['employeeCookie']), PDO::PARAM_STR);
+  $insert_user_log_prepare->bindValue(":_user_id", htmlspecialchars($_SESSION['employeeUserID']), PDO::PARAM_INT);
+  $insert_user_log_prepare->bindValue(":_url", $_SERVER['PHP_SELF'], PDO::PARAM_STR);
 
-      $conn=NULL;
-      $get_user_secret_prepare=NULL;
-      $get_user_id_prepare=NULL;
-      $check_email_address_prepare=NULL;
-      exit(1);
-    }
-  
-    $get_user_id_prepare=
-    $conn->prepare("SELECT user_id
-    FROM `user` WHERE
-    `email` = :_email;");
-  
-    $get_user_id_prepare->bindValue(":_email", $user_email, PDO::PARAM_STR);
-  
-    if($get_user_id_prepare->execute() < 1){
-      echo "Unknown error";
-      
-      $conn=NULL;
-      $get_user_secret_prepare=NULL;
-      $get_user_id_prepare=NULL;
-      $check_email_address_prepare=NULL;
-      exit(1);
-    }
-  
-    // Get user ID.
-    $user_id=
-    $get_user_id_prepare->fetch(PDO::FETCH_ASSOC);
-   
-    // Obtain salt & password hash using acqired user ID.
-    $get_user_secret_prepare=
-    $conn->prepare("SELECT `salt`, `password` 
-    FROM `user_secret` WHERE
-    `user_id` = :_user_id;");
-  
-    $get_user_secret_prepare->bindValue(":_user_id", $user_id, PDO::PARAM_INT);
-    
-    if($get_user_secret_prepare->execute() < 1){
-      echo "Unknown error";
-      
-      $conn=NULL;
-      $get_user_secret_prepare=NULL;
-      $get_user_id_prepare=NULL;
-      $check_email_address_prepare=NULL;
-      exit(1);
-    }
-  
-    $user_secret=$get_user_secret_prepare->fetch(PDO::FETCH_ASSOC);
-  
-    $salt=$user_secret['salt'];
-    $password_hash=$user_secret['password'];
-
-    if($password_hash == hash('sha256',$salt.$password_char.$pepper)){
-      session_name('employee_cookie');
-      session_start([
-        'cookie_lifetime' => 600
-      ]);
-      session_regenerate_id(true);
-      
-      $_SESSION['ipaddress']=$_SERVER['REMOTE_ADDR'];
-      $_SESSION['useragent']=$_SERVER['HTTP_USER_AGENT'];
-      echo "Success!";
-      print_r($_SESSION);
-    }
-    else {
-      echo "Unknown error.";
-      exit(1);
-    }
-    $conn=NULL;
-    $get_user_secret_prepare=NULL;
-    $get_user_id_prepare=NULL;
-    $check_email_address_prepare=NULL;
-
+  if($insert_user_log_prepare->execute() < 1){
+    echo "Unknown error.";
   }
 
-  else {
-    // If a user is inactive for 30 minutes, then a user 
-    // cannot login with the same cookie that a user previously used.
-    echo "Success!!~~";
-  }
+  echo "Recorded...";
 }
 
 catch(PDOException $e)  {
+  print $e;
   echo "Unknown error.";
   exit(1); 
 }

@@ -1,11 +1,159 @@
+<?php 
+
+header("Content-Type: text/html;charset=UTF-8");
+error_reporting(E_ALL ^ E_WARNING ^ E_NOTICE);
+
+include "/var/www/html/.secret/.config.php";
+
+require_once("/var/www/html/plugin/strip_malicious_character.php");
+
+// Create a session.
+session_name('user_cookie');
+session_start([
+  'cookie_lifetime' => $user_login_expiration_time,
+  'sid_length' => $user_login_expiration_time
+]);
+
+// Get email & password for login.
+$user_email=htmlspecialchars($_POST['employeeLoginIDInput']);
+$password_char=htmlspecialchars($_POST['employeeLoginPasswordInput']);
+
+try {
+  
+  // Check user input twice to prevent the attack
+  // done by modifying javascript.
+
+  // TODO: The admin will automatically move to the
+  // webpage if it has his/her cookie.
+  if(!empty($_SESSION['adminCookie'])){
+
+  }
+
+  if(!empty($_SESSION['employeeCookie'])){
+    header('Location: /employee/employee_time_sheet.php');
+  }
+
+  
+  // If a cookie does not exist, then set the cookie for a user.
+  if(!empty($_POST['employeeLoginIDInput']) &&
+     !empty($_POST['employeeLoginPasswordInput'])) {
+
+    $conn = new PDO("mysql:host=$host;dbname=$db;charset=utf8mb4", $user, $pass);
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    
+    // Check whether a user has logged in with his/her user account.
+    $check_email_address_prepare=
+    $conn->prepare("SELECT COUNT(`email`) as email_count
+    FROM `user` WHERE
+    `email` = :_email;");
+  
+    $check_email_address_prepare->bindValue(":_email", $user_email , PDO::PARAM_STR);
+  
+    if($check_email_address_prepare->execute() < 1){
+      echo "Unknown error";
+      
+      $conn=NULL;
+      $get_user_secret_prepare=NULL;
+      $get_user_id_prepare=NULL;
+      $check_email_address_prepare=NULL;
+      exit(1);
+    }
+  
+    if($check_email_address_prepare->fetch(PDO::FETCH_ASSOC)['email_count'] < 1) {
+      echo "Unknown error";
+
+      $conn=NULL;
+      $get_user_secret_prepare=NULL;
+      $get_user_id_prepare=NULL;
+      $check_email_address_prepare=NULL;
+      exit(1);
+    }
+  
+    $get_user_id_prepare=
+    $conn->prepare("SELECT user_id
+    FROM `user` WHERE
+    `email` = :_email;");
+  
+    $get_user_id_prepare->bindValue(":_email", $user_email, PDO::PARAM_STR);
+  
+    if($get_user_id_prepare->execute() < 1){
+      echo "Unknown error";
+      
+      $conn=NULL;
+      $get_user_secret_prepare=NULL;
+      $get_user_id_prepare=NULL;
+      $check_email_address_prepare=NULL;
+      exit(1);
+    }
+  
+    // Get user ID.
+    $user_id=
+    $get_user_id_prepare->fetch(PDO::FETCH_ASSOC)['user_id'];
+   
+    // Obtain salt & password hash using acqired user ID.
+    $get_user_secret_prepare=
+    $conn->prepare("SELECT `salt`, `password` 
+    FROM `user_secret` WHERE
+    `user_id` = :_user_id;");
+  
+    $get_user_secret_prepare->bindValue(":_user_id", $user_id, PDO::PARAM_INT);
+    
+    if($get_user_secret_prepare->execute() < 1){
+      echo "Unknown error";
+      
+      $conn=NULL;
+      $get_user_secret_prepare=NULL;
+      $get_user_id_prepare=NULL;
+      $check_email_address_prepare=NULL;
+      exit(1);
+    }
+  
+    $user_secret=$get_user_secret_prepare->fetch(PDO::FETCH_ASSOC);
+  
+    $salt=$user_secret['salt'];
+    $password_hash=$user_secret['password'];
+
+    if($password_hash == hash('sha256',$salt.$password_char.$pepper)){
+      
+      $_SESSION['ipaddress']=$_SERVER['REMOTE_ADDR'];
+      $_SESSION['useragent']=$_SERVER['HTTP_USER_AGENT'];
+      $_SESSION['employeeUserID']=$user_id['user_id'];
+      $_SESSION['employeeCookie']=bin2hex(random_bytes(32));
+
+      setcookie(session_name(),session_id(),time()+$user_login_expiration_time);
+
+      header('Location: /employee/employee_time_sheet.php');
+    }
+    else {
+      echo "Unknown error.";
+      exit(1);
+    }
+    $conn=NULL;
+    $get_user_secret_prepare=NULL;
+    $get_user_id_prepare=NULL;
+    $check_email_address_prepare=NULL;
+    exit(0);
+
+  }
+}
+
+catch(PDOException $e)  {
+  echo "Unknown error.";
+  exit(1); 
+}
+
+?>
+
+
 <!-- The time sheet for employees will be done here... -->
-<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 <link href='/css/bootstrap.min.css' rel='stylesheet'>
 <link href='/css/index.css' rel='stylesheet'>
 <script src="/script/jquery-3.6.0.min.js"></script>
 
 <!-- Load script  -->
 <script src="/script/check_employee_login.js"></script>
+
+
 
 <div class="container">
 <div class="row">
@@ -24,7 +172,7 @@
   <br>
   <form id="employeeLogin"
   method="POST"  
-  action="/employee/employee_time_sheet.php" 
+  action="/" 
   class="d-flex row justify-content-center"
   enctype="multipart/form-data" accept-charset="UTF-8"
   >
@@ -96,8 +244,8 @@
     <br>
   </form>
 </div>
-
 <script>
-  // Get access to the website
-  // console.log("Test");
+if ( window.history.replaceState ) {
+  window.history.replaceState( null, null, window.location.href );
+}
 </script>

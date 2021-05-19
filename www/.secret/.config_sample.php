@@ -10,7 +10,7 @@ $pass   = '_____time_sheet_pass_____';
 $pepper = '_____pepper_string_____';
 $error_message = "Unknown error."
 
-$user_login_expiration_time=1000*1800;
+$user_login_expiration_time=1800;
 
 $charset = 'utf8mb4';
 ?>
