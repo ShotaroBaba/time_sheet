@@ -11,8 +11,7 @@ require_once("/var/www/html/plugin/strip_malicious_character.php");
 // re input his/her own info again.
 
 // Get email & password for login.
-$user_email=htmlspecialchars($_POST['employeeEmail']);
-$password_char=htmlspecialchars($_POST['employeePassword']);
+
 
 try {
   
@@ -20,7 +19,8 @@ try {
   // done by modifying javascript.
 
   // If a cookie does not exist, then set the cookie for a user.
-
+  $user_email=htmlspecialchars($_POST['employeeEmail']);
+  $password_char=htmlspecialchars($_POST['employeePassword']);
 
   $conn = new PDO("mysql:host=$host;dbname=$db;charset=utf8mb4", $user, $pass);
   $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);

@@ -16,11 +16,12 @@ CREATE TABLE IF NOT EXISTS `user` (
   `phone_number` VARCHAR(48) NOT NULL,
   `employee_type_id` INT DEFAULT 1 NOT NULL,
   `email` VARCHAR(128) NOT NULL,
+  `state` VARCHAR(16) DEFAULT 'left_work' NOT NULL
   UNIQUE (`first_name`, `middle_name`, `last_name`, `phone_number`),
   UNIQUE (`email`)
 );
 
-CREATE TABLE IF NOT EXISTS `time_sheet_table` (
+CREATE TABLE IF NOT EXISTS `time_sheet` (
   `time_id` BIGINT auto_increment,
   `user_id` BIGINT NOT NULL,
   `employee_type_id` INT,
@@ -34,7 +35,7 @@ CREATE TABLE IF NOT EXISTS `time_sheet_table` (
 CREATE TABLE IF NOT EXISTS `user_log` (
   `session_id` VARCHAR(64) NOT NULL,
   `user_id` BIGINT NOT NULL,
-  `login_time`  DATETIME NOT NULL,
+  `login_time`  DATETIME(6) NOT NULL,
   `url` TEXT NOT NULL
 );
 
@@ -62,12 +63,13 @@ CREATE TABLE IF NOT EXISTS `user_secret` (
 );
 
 ALTER TABLE `user_secret` ADD FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`);
-ALTER TABLE `time_sheet_table` ADD FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`);
-ALTER TABLE `time_sheet_table` ADD FOREIGN KEY (`employee_type_id`) REFERENCES `occupation` (`employee_type_id`);
+ALTER TABLE `user_log` ADD FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`);
+ALTER TABLE `time_sheet` ADD FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`);
+ALTER TABLE `time_sheet` ADD FOREIGN KEY (`employee_type_id`) REFERENCES `occupation` (`employee_type_id`)
 ALTER TABLE `user` ADD FOREIGN KEY (`employee_type_id`) REFERENCES `occupation` (`employee_type_id`);
 
 -- Change users' database permissions
-GRANT SELECT, INSERT ON `time_sheet`.* TO 'time_sheet_client'@'%';
+GRANT SELECT, INSERT, UPDATE ON `time_sheet`.* TO 'time_sheet_client'@'%';
 GRANT ALL PRIVILEGES ON `time_sheet`.* TO 'time_sheet_admin'@'%' WITH GRANT OPTION;
 
 COMMIT;

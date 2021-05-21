@@ -11,7 +11,7 @@ require_once("/var/www/html/plugin/strip_malicious_character.php");
 session_name('user_cookie');
 session_start([
   'cookie_lifetime' => $user_login_expiration_time,
-  'sid_length' => $user_login_expiration_time
+  'sid_length' => 128
 ]);
 
 // Get email & password for login.
