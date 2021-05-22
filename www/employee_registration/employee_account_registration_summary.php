@@ -54,13 +54,18 @@ $_SESSION["user_info"]=$_POST;
 
 ?>
 
+<!-- 
+  Source: 
+  Bootstrap: https://getbootstrap.com/
+  Popper: https://popper.js.org/
+  jQuery: https://jquery.com/
+-->
 
 <!-- TODO: Enable strict session id check. -->
 <!-- Load css files. -->
 
-<link href='/css/bootstrap.min.css' rel='stylesheet'>
-<link href='/css/index.css' rel='stylesheet'>
-
+<link href='/css/bootstrap.min.css?v=1' rel='stylesheet'>
+<link href='/css/index.css?v=<?php echo time(); ?>' rel='stylesheet'>
 
 <div class="container align-items-center" id="formReview">
   <h1 style="text-align: center">Account Registration Review</h1>

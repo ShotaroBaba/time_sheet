@@ -1,12 +1,19 @@
 <!-- Load css files. -->
 
-<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
-<link href='/css/bootstrap.min.css' rel='stylesheet'>
-<link href='/css/index.css' rel='stylesheet'>
-<script src="/script/jquery-3.6.0.min.js"></script>
-<!-- Load script for registration -->
-<script src="/script/register.js"></script>
+<!-- 
+  Source: 
+  Bootstrap: https://getbootstrap.com/
+  Popper: https://popper.js.org/
+  jQuery: https://jquery.com/
+-->
 
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+
+<link href='/css/bootstrap.min.css?v=1' rel='stylesheet'>
+<link href='/css/index.css?v=<?php echo time(); ?>' rel='stylesheet'>
+<script src="/script/jquery-3.6.0.min.js"></script>
+<!-- Load Script For registration -->
+<script src="/script/register.js?v=<?php echo time(); ?>"></script>
 
 <!DOCTYPE html>
 <html lang="en">

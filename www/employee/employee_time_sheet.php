@@ -136,6 +136,18 @@ try {
     exit(1);
   }
 
+  $select_user_attendance_record=
+  $conn->prepare("SELECT @row_num := @row_num + 1 AS sheet_no, i.* FROM (SELECT `time`,`state`,`occupation_type` FROM `time_sheet` JOIN 
+  `occupation` USING (`employee_type_id`) WHERE `user_id` = :_user_id) i, (SELECT @row_num := 0) t;");
+
+  $select_user_attendance_record->bindValue(":_user_id", htmlspecialchars($_SESSION['employeeUserID']), PDO::PARAM_INT);
+
+  if($select_user_attendance_record->execute() < 1){
+    echo "Unknown error.";
+    exit(1);
+  }
+
+  $select_result=$select_user_attendance_record->fetchAll();
 }
 
 catch(PDOException $e)  {
@@ -144,6 +156,12 @@ catch(PDOException $e)  {
 }
 
 ?>
+<!-- 
+  Source: 
+  Bootstrap: https://getbootstrap.com/
+  Popper: https://popper.js.org/
+  jQuery: https://jquery.com/
+-->
 
 <!DOCTYPE html>
 <html lang="en">
@@ -154,15 +172,44 @@ catch(PDOException $e)  {
   <title>Document</title>
 </head>
 
-<link href='/css/bootstrap.min.css' rel='stylesheet'>
-<link href='/css/index.css' rel='stylesheet'>
+<link href='/css/bootstrap.min.css?v=1' rel='stylesheet'>
+<link href='/css/index.css?v=<?php echo time(); ?>' rel='stylesheet'>
 <script src="/script/jquery-3.6.0.min.js"></script>
-<script src="/script/register.js"></script>
+<script src="/script/popper.min.js?v=1"></script>
+<script src="/script/bootstrap.bundle.min.js?v=1"></script>
+<script src="/script/register.js?v=<?php echo time(); ?>"></script>
 
 <body>
   
 
   Name: <?php echo $user_info['first_name']." ".$user_info['middle_name']." ".$user_info['last_name'];?>
+
+  <table class="table">
+    <thead class="dark-head">
+      <tr class="table-head">
+        <th>No. </th>
+        <th>Time</th>
+        <th>Attendance Status</th>
+        <th>Occupation</th>
+      </tr>
+    </thead>
+    <tbody>
+      <?php 
+        $i=0;
+        foreach ($select_result as $v) {
+          $class_tag=$i%2==0?" class='grey-table-row'":"";
+          $work_status=$v['state']=="working"?"At work":"Already left";
+          echo "<tr".$class_tag.">";
+          echo "<th>".$v['sheet_no']."</th>";
+          echo "<th>".$v['time']."</th>";
+          echo "<th>".$work_status."</th>";
+          echo "<th>".$v['occupation_type']."</th>";
+          echo "</tr>";
+          $i++;
+        }
+      ?>
+    </tbody>
+  </table>
 
   <form action="/employee/employee_time_sheet.php" method="GET">
     <button type="submit" name="i" value="logout">Logout</button>
@@ -170,8 +217,20 @@ catch(PDOException $e)  {
     name="i" 
     value=<?php echo($user_info['state']=='left_work' ? '"working"' : '"left_work"'); ?>
     ><?php echo( $user_info['state']=='left_work' ? "Attend" : "Leave");   ?></button>
+    
+    <!-- Pull down menu -->
+    <div class="dropdown">
+      <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        Dropdown button
+      </button>
+      <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+        <a class="dropdown-item">10</a>
+        <a class="dropdown-item">25</a>
+        <a class="dropdown-item">50</a>
+        <a class="dropdown-item">100</a>
+      </div>
+    </div>
   </form>
-
 </body>
 </html>
 

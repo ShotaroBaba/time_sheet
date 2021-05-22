@@ -15,3 +15,12 @@
 .error-message{
     color: red;
 }
+
+thead.dark-head{
+    background-color: black;
+    color: white;
+}
+
+tr.grey-table-row{
+    background-color: #e0e0e0;
+}
