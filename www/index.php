@@ -156,7 +156,8 @@ catch(PDOException $e)  {
 <link href='/css/bootstrap.min.css?v=1' rel='stylesheet'>
 <link href='/css/index.css?v=<?php echo time(); ?>' rel='stylesheet'>
 <script src="/script/jquery-3.6.0.min.js"></script>
-<script src="/script/popper.min.js?v=1"></script>
+
+<script src="/script/popper.js"></script>
 <script src="/script/bootstrap.bundle.min.js?v=1"></script>
 <!-- Load script  -->
 <script src="/script/check_employee_login.js?v=<?php echo time(); ?>"></script>
@@ -220,16 +221,7 @@ catch(PDOException $e)  {
 </div>
 
 <br><br><br>
-<hr/><div class="dropdown">
-  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-    Dropdown button
-  </button>
-  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-    <a class="dropdown-item" href="#">Action</a>
-    <a class="dropdown-item" href="#">Another action</a>
-    <a class="dropdown-item" href="#">Something else here</a>
-  </div>
-</div>
+<hr/>
 <br>
 
 <!-- The below is a Admin user login. Used for adding, deleting employees manually, or 

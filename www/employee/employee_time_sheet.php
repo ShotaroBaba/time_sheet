@@ -175,7 +175,7 @@ catch(PDOException $e)  {
 <link href='/css/bootstrap.min.css?v=1' rel='stylesheet'>
 <link href='/css/index.css?v=<?php echo time(); ?>' rel='stylesheet'>
 <script src="/script/jquery-3.6.0.min.js"></script>
-<script src="/script/popper.min.js?v=1"></script>
+<script src="/script/popper.js?v=1"></script>
 <script src="/script/bootstrap.bundle.min.js?v=1"></script>
 <script src="/script/register.js?v=<?php echo time(); ?>"></script>
 
@@ -211,7 +211,7 @@ catch(PDOException $e)  {
     </tbody>
   </table>
 
-  <form action="/employee/employee_time_sheet.php" method="GET">
+  <form action="/employee/employee_time_sheet.php" id="userForm" method="GET">
     <button type="submit" name="i" value="logout">Logout</button>
     <button type="submit" 
     name="i" 
@@ -220,14 +220,30 @@ catch(PDOException $e)  {
     
     <!-- Pull down menu -->
     <div class="dropdown">
-      <button class="btn btn-secondary dropdown-toggle" onchange="this.form.submit()" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-        Dropdown button
+      <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <?php 
+          switch ($_GET['t']){
+            case '10':
+              echo 10;
+              break;
+            case '25':
+              echo 25;
+              break;
+            case '50':
+              break;
+            case '100':
+              echo 100;
+              break;
+            default:
+              echo 'Select row num';
+          }
+        ?>
       </button>
       <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-        <a class="dropdown-item">10</a>
-        <a class="dropdown-item">25</a>
-        <a class="dropdown-item">50</a>
-        <a class="dropdown-item">100</a>
+        <a class="dropdown-item" name='t' onclick="$('#userForm').submit();" value='10'>10</a>
+        <a class="dropdown-item" name='t' onclick="$('#userForm').submit();"value='25'>25</a>
+        <a class="dropdown-item" name='t' onclick="$('#userForm').submit();"value='50'>50</a>
+        <a class="dropdown-item" name='t' onclick="$('#userForm').submit();"value='100'>100</a>
       </div>
     </div>
   </form>
