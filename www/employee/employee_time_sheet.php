@@ -36,10 +36,6 @@ if ($_SERVER['HTTP_USER_AGENT'] != $_SESSION['useragent'])
   exit(0);
 }
 
-// Get email & password for login.
-$user_email=htmlspecialchars($_POST['employeeLoginIDInput']);
-$password_char=htmlspecialchars($_POST['employeeLoginPasswordInput']);
-
 
 // If a user remains inactive for a certain time, then
 // a user will automatically be logged out.
@@ -136,6 +132,7 @@ try {
     exit(1);
   }
 
+  // TODO: Put LIMIT and OFFSET.
   $select_user_attendance_record=
   $conn->prepare("SELECT @row_num := @row_num + 1 AS sheet_no, i.* FROM (SELECT `time`,`state`,`occupation_type` FROM `time_sheet` JOIN 
   `occupation` USING (`employee_type_id`) WHERE `user_id` = :_user_id) i, (SELECT @row_num := 0) t;");
@@ -148,6 +145,26 @@ try {
   }
 
   $select_result=$select_user_attendance_record->fetchAll();
+
+  $total_user_attendance_num=$conn->prepare("SELECT COUNT(*) AS total_attend_num FROM (SELECT `time`,`state`,`occupation_type` FROM `time_sheet` JOIN 
+  `occupation` USING (`employee_type_id`) WHERE `user_id` = :_user_id) AS t;");
+
+  $total_user_attendance_num->bindValue(":_user_id", htmlspecialchars($_SESSION['employeeUserID']), PDO::PARAM_INT);
+
+  if($total_user_attendance_num->execute() < 1){
+    echo "Unknown error.";
+    exit(1);
+  }
+
+  $total_result=$total_user_attendance_num->fetch();
+
+  // Injection attack prevention
+  $select_num_output= $_GET['t'] == '' || is_null($_GET['t']) ? 10 : htmlspecialchars($_GET['t']);
+  $num_selection_output=$_GET['n']== '' || is_null($_GET) ? 1 : htmlspecialchars($_GET['n']);
+
+  // Finally set cookie
+  setcookie(session_name(),session_id(),time()+$user_login_expiration_time);
+
 }
 
 catch(PDOException $e)  {
@@ -217,35 +234,36 @@ catch(PDOException $e)  {
     name="i" 
     value=<?php echo($user_info['state']=='left_work' ? '"working"' : '"left_work"'); ?>
     ><?php echo( $user_info['state']=='left_work' ? "Attend" : "Leave");   ?></button>
-    
+    <input class="span2" id="t" name="t" type="hidden" 
+    value='<?php echo $select_num_output; ?>'>
+    <input class="span2" id="n" name="n" type="hidden"
+    value=''>
+
     <!-- Pull down menu -->
     <div class="dropdown">
       <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-        <?php 
-          switch ($_GET['t']){
-            case '10':
-              echo 10;
-              break;
-            case '25':
-              echo 25;
-              break;
-            case '50':
-              break;
-            case '100':
-              echo 100;
-              break;
-            default:
-              echo 'Select row num';
-          }
+        <?php
+          echo $select_num_output;
         ?>
       </button>
-      <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-        <a class="dropdown-item" name='t' onclick="$('#userForm').submit();" value='10'>10</a>
-        <a class="dropdown-item" name='t' onclick="$('#userForm').submit();"value='25'>25</a>
-        <a class="dropdown-item" name='t' onclick="$('#userForm').submit();"value='50'>50</a>
-        <a class="dropdown-item" name='t' onclick="$('#userForm').submit();"value='100'>100</a>
-      </div>
+      <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+        <li class="dropdown-item"  onclick="$('#t').val(10);$('#userForm').submit();" value='10'>10</a>
+        <li class="dropdown-item"  onclick="$('#t').val(25);$('#userForm').submit();"value='25'>25</a>
+        <li class="dropdown-item"  onclick="$('#t').val(50);$('#userForm').submit();"value='50'>50</a>
+        <li class="dropdown-item"  onclick="$('#t').val(100);$('#userForm').submit();"value='100'>100</a>
+      </ul>
     </div>
+
+    <?php echo intdiv($total_result['total_attend_num'],$select_num_output)+1; ?>
+    <nav aria-label="Page navigation example">
+      <ul class="pagination">
+        <li class="page-item"><a class="page-link" href='#'>Previous</a></li>
+        <li class="page-item"><a class="page-link" href='#'>1</a></li>
+        <li class="page-item"><a class="page-link" href='#'>2</a></li>
+        <li class="page-item"><a class="page-link" href='#'>3</a></li>
+        <li class="page-item"><a class="page-link" href='#'>Next</a></li>
+      </ul>
+    </nav>
   </form>
 </body>
 </html>
