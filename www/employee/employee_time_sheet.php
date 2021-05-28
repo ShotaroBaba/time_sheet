@@ -4,6 +4,7 @@ header("Content-Type: text/html;charset=UTF-8");
 error_reporting(E_ALL ^ E_WARNING ^ E_NOTICE);
 
 include "/var/www/html/.secret/.config.php";
+include "/var/www/html/plugin/create_next_previous_button.php";
 
 require_once("/var/www/html/plugin/strip_malicious_character.php");
 
@@ -46,6 +47,15 @@ try {
     session_destroy();
     header('Location: /');
     exit(0);
+  }
+
+  // Only a number for 't' and 'n' inputs is allowed.
+  if(
+    (!is_null($_GET['t']) && !is_numeric($_GET['t'])) ||
+    (!is_null($_GET['n']) && !is_numeric($_GET['n']))
+  ){
+    echo "Unknown error.";
+    exit(1);
   }
 
   // Get user info from a user_id;
@@ -132,20 +142,6 @@ try {
     exit(1);
   }
 
-  // TODO: Put LIMIT and OFFSET.
-  $select_user_attendance_record=
-  $conn->prepare("SELECT @row_num := @row_num + 1 AS sheet_no, i.* FROM (SELECT `time`,`state`,`occupation_type` FROM `time_sheet` JOIN 
-  `occupation` USING (`employee_type_id`) WHERE `user_id` = :_user_id) i, (SELECT @row_num := 0) t;");
-
-  $select_user_attendance_record->bindValue(":_user_id", htmlspecialchars($_SESSION['employeeUserID']), PDO::PARAM_INT);
-
-  if($select_user_attendance_record->execute() < 1){
-    echo "Unknown error.";
-    exit(1);
-  }
-
-  $select_result=$select_user_attendance_record->fetchAll();
-
   $total_user_attendance_num=$conn->prepare("SELECT COUNT(*) AS total_attend_num FROM (SELECT `time`,`state`,`occupation_type` FROM `time_sheet` JOIN 
   `occupation` USING (`employee_type_id`) WHERE `user_id` = :_user_id) AS t;");
 
@@ -156,13 +152,46 @@ try {
     exit(1);
   }
 
+
+
   $total_result=$total_user_attendance_num->fetch();
 
+  
   // Injection attack prevention
-  $select_num_output= $_GET['t'] == '' || is_null($_GET['t']) ? 10 : htmlspecialchars($_GET['t']);
-  $num_selection_output=$_GET['n']== '' || is_null($_GET) ? 1 : htmlspecialchars($_GET['n']);
+  $select_num_output=$_GET['t'] == '' || is_null($_GET['t']) ? 10 : htmlspecialchars($_GET['t']);
+  $num_selection_output=$_GET['n']== '' || is_null($_GET['n']) ? 1 : htmlspecialchars($_GET['n']);
 
-  // Finally set cookie
+  // Set the limit of selection.
+  $select_min=1;
+  $select_max=intdiv($total_result['total_attend_num'],$select_num_output);
+  if($total_result['total_attend_num']/($select_num_output*$select_max) > 1 || $select_max ==0){
+    $select_max+=1;
+  }
+  echo $total_result['total_attend_num']/$select_num_output;
+  $num_selection_output_tmp=$num_selection_output;
+  // Prevent re-setting the number selection.
+  if($num_selection_output>$select_max){
+    $num_selection_output_tmp=$select_max;
+  }
+
+  // TODO: Put LIMIT and OFFSET.
+  $select_user_attendance_record=
+  $conn->prepare("SELECT * FROM (SELECT @row_num := @row_num + 1 AS sheet_no, i.* FROM (SELECT `time`,`state`,`occupation_type` FROM employeeCookie`time_sheet` JOIN 
+  `occupation` USING (`employee_type_id`) WHERE `user_id` = :_user_id) i, (SELECT @row_num := 0) t) AS total 
+  LIMIT :_total OFFSET :_n_total;");
+
+  $select_user_attendance_record->bindValue(":_user_id", htmlspecialchars($_SESSION['employeeUserID']), PDO::PARAM_INT);
+  $select_user_attendance_record->bindValue(":_total", $select_num_output, PDO::PARAM_INT);
+  $select_user_attendance_record->bindValue(":_n_total", $select_num_output*($num_selection_output_tmp-1), PDO::PARAM_INT);
+
+  if($select_user_attendance_record->execute() < 1){
+    echo "Unknown error.";
+    exit(1);
+  }
+
+  $select_result=$select_user_attendance_record->fetchAll();
+
+  // Finally reset cookie lifetime.
   setcookie(session_name(),session_id(),time()+$user_login_expiration_time);
 
 }
@@ -186,7 +215,7 @@ catch(PDOException $e)  {
   <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">   
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
+  <title>Time Sheet (<?php echo $user_info['first_name']; ?>)</title>
 </head>
 
 <link href='/css/bootstrap.min.css?v=1' rel='stylesheet'>
@@ -231,13 +260,13 @@ catch(PDOException $e)  {
   <form action="/employee/employee_time_sheet.php" id="userForm" method="GET">
     <button type="submit" name="i" value="logout">Logout</button>
     <button type="submit" 
-    name="i" 
+    name="i" num_selection_output
     value=<?php echo($user_info['state']=='left_work' ? '"working"' : '"left_work"'); ?>
     ><?php echo( $user_info['state']=='left_work' ? "Attend" : "Leave");   ?></button>
     <input class="span2" id="t" name="t" type="hidden" 
     value='<?php echo $select_num_output; ?>'>
     <input class="span2" id="n" name="n" type="hidden"
-    value=''>
+    value='<?php echo $num_selection_output?>'>
 
     <!-- Pull down menu -->
     <div class="dropdown">
@@ -255,17 +284,13 @@ catch(PDOException $e)  {
     </div>
 
     <?php echo intdiv($total_result['total_attend_num'],$select_num_output)+1; ?>
+
     <nav aria-label="Page navigation example">
       <ul class="pagination">
-        <li class="page-item"><a class="page-link" href='#'>Previous</a></li>
-        <li class="page-item"><a class="page-link" href='#'>1</a></li>
-        <li class="page-item"><a class="page-link" href='#'>2</a></li>
-        <li class="page-item"><a class="page-link" href='#'>3</a></li>
-        <li class="page-item"><a class="page-link" href='#'>Next</a></li>
+      <?php generate_previous_next_button($select_min,$select_max,$num_selection_output_tmp);?>;
       </ul>
     </nav>
   </form>
 </body>
-</html>
 
 
