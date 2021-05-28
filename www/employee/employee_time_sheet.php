@@ -178,6 +178,7 @@ try {
   // TODO: Put LIMIT and OFFSET.
   $select_user_attendance_record=
   $conn->prepare("SELECT * FROM (SELECT @row_num := @row_num + 1 AS sheet_no, i.* FROM (SELECT `time`,`state`,`occupation_type` FROM `time_sheet` JOIN 
+
   `occupation` USING (`employee_type_id`) WHERE `user_id` = :_user_id) i, (SELECT @row_num := 0) t) AS total 
   LIMIT :_total OFFSET :_n_total;");
 
