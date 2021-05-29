@@ -36,7 +36,7 @@ function generate_previous_next_button($min,$max,$current_pos){
             echo $min < $current_pos - 1 ? _generate_li_tag($current_pos-1,$current_pos-1): '';
             echo $current_pos == $min || $current_pos == $max ? '' : _generate_li_tag($current_pos) ;
             echo $current_pos + 1 < $max ? _generate_li_tag($current_pos+1,$current_pos+1): '';
-            echo $current_pos +2 < $max ? _generate_li_tag('...'): '';
+            echo $current_pos + 2 < $max ? _generate_li_tag('...'): '';
             echo $current_pos == $max ?  _generate_li_tag($max) : _generate_li_tag($max,$max);
             echo $max == $current_pos ? '' :_generate_li_tag(htmlspecialchars(">"),$current_pos+1);
             echo $max == $current_pos ? '' :_generate_li_tag(htmlspecialchars(">>"),$max);

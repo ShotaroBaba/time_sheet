@@ -30,6 +30,7 @@ function checkEmployeeInput(){
         }
 
     }).fail( function(data){
-            $('#employeeLoginErrorMessage').html("Password or user name incorrect.");
+
+        $('#employeeLoginErrorMessage').html("Password or user name incorrect.");
     });
 };

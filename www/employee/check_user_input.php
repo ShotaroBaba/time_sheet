@@ -80,7 +80,7 @@ try {
   FROM `user_secret` WHERE
   `user_id` = :_user_id;");
 
-  $get_user_secret_prepare->bindValue(":_user_id", $user_id, PDO::PARAM_INT);
+  $get_user_secret_prepare->bindValue(":_user_id", $user_id['user_id'], PDO::PARAM_INT);
 
   if($get_user_secret_prepare->execute() < 1){
       echo "Unknown error";

@@ -21,6 +21,24 @@ CREATE TABLE IF NOT EXISTS `user` (
   UNIQUE (`email`)
 );
 
+-- Any data does not correspond to admin user
+-- Password is automatically generated.
+-- This table is completely independent.
+CREATE TABLE IF NOT EXISTS `admin_user` (
+  `admin_user_id` BIGINT PRIMARY KEY auto_increment,
+  `first_name` VARCHAR(128) NOT NULL,
+  `middle_name` VARCHAR(128),
+  `last_name` VARCHAR(128) NOT NULL,
+  `address` VARCHAR(256) NOT NULL,
+  `phone_number` VARCHAR(48) NOT NULL,
+  `employee_type_id` INT DEFAULT 1 NOT NULL,
+  `email` VARCHAR(128) NOT NULL,
+  `salt` VARCHAR(50) NOT NULL,
+  `password` VARCHAR(256) NOT NULL,
+  UNIQUE (`first_name`, `middle_name`, `last_name`, `phone_number`),
+  UNIQUE (`email`)
+);
+
 CREATE TABLE IF NOT EXISTS `time_sheet` (
   `time_id` BIGINT auto_increment,
   `user_id` BIGINT NOT NULL,

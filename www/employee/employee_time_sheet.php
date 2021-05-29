@@ -37,6 +37,12 @@ if ($_SERVER['HTTP_USER_AGENT'] != $_SESSION['useragent'])
   exit(0);
 }
 
+if(isset($_SESSION['expireAfter']) & time() > $_SESSION['expireAfter'] ){
+  session_unset();
+  session_destroy();
+  header('Location: /');
+  exit(0);
+}
 
 // If a user remains inactive for a certain time, then
 // a user will automatically be logged out.
@@ -194,7 +200,7 @@ try {
   $select_result=$select_user_attendance_record->fetchAll();
 
   // Finally reset cookie lifetime.
-  setcookie(session_name(),session_id(),time()+$user_login_expiration_time);
+  $_SESSION['expireAfter']=time()+$user_login_expiration_time;
 
 }
 
@@ -285,11 +291,9 @@ catch(PDOException $e)  {
       </ul>
     </div>
 
-    <?php echo intdiv($total_result['total_attend_num'],$select_num_output)+1; ?>
-
     <nav aria-label="Page navigation example">
       <ul class="pagination">
-      <?php generate_previous_next_button($select_min,$select_max,$num_selection_output_tmp);?>;
+      <?php generate_previous_next_button($select_min,$select_max,$num_selection_output_tmp);?>
       </ul>
     </nav>
   </form>

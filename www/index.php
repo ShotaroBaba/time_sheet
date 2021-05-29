@@ -7,12 +7,6 @@ include "/var/www/html/.secret/.config.php";
 
 require_once("/var/www/html/plugin/strip_malicious_character.php");
 
-// Create a session.
-session_name('user_cookie');
-session_start([
-  'cookie_lifetime' => $user_login_expiration_time,
-  'sid_length' => 128
-]);
 
 // Get email & password for login.
 $user_email=htmlspecialchars($_POST['employeeLoginIDInput']);
@@ -87,8 +81,7 @@ try {
     }
   
     // Get user ID.
-    $user_id=
-    $get_user_id_prepare->fetch(PDO::FETCH_ASSOC)['user_id'];
+    $user_id=$get_user_id_prepare->fetch(PDO::FETCH_ASSOC)['user_id'];
    
     // Obtain salt & password hash using acqired user ID.
     $get_user_secret_prepare=
@@ -115,12 +108,20 @@ try {
 
     if($password_hash == hash('sha256',$salt.$password_char.$pepper)){
       
+      // Create a session.
+      session_name('user_cookie');
+
+      // Set a large session length.
+      session_start([
+        'sid_length' => 128
+      ]);
+
       $_SESSION['ipaddress']=$_SERVER['REMOTE_ADDR'];
       $_SESSION['useragent']=$_SERVER['HTTP_USER_AGENT'];
       $_SESSION['employeeUserID']=$user_id['user_id'];
       $_SESSION['employeeCookie']=bin2hex(random_bytes(32));
+      $_SESSION['expireAfter']= time()+$user_login_expiration_time;
 
-      setcookie(session_name(),session_id(),time()+$user_login_expiration_time);
 
       header('Location: /employee/employee_time_sheet.php');
     }
