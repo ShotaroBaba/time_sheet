@@ -162,7 +162,7 @@ catch(PDOException $e)  {
 <script src="/script/bootstrap.bundle.min.js?v=1"></script>
 <!-- Load script  -->
 <script src="/script/check_employee_login.js?v=<?php echo time(); ?>"></script>
-
+<script src="/script/check_admin_login.js?v=<?php echo time(); ?>"></script>
 
 
 <div class="container">
@@ -232,7 +232,13 @@ catch(PDOException $e)  {
     Administrator Login
   </div>
   <br>
-  <form>
+  <form
+  form id="adminLogin"
+  method="POST"  
+  action="/" 
+  class="d-flex row justify-content-center"
+  enctype="multipart/form-data" accept-charset="UTF-8"
+  >
     <div class="form-group-sm row justify-content-center">
       <label for="adminLoginIDInput" class="col-sm-1 col-form-label">Login ID: </label>
       <div class="col-sm-3">
@@ -248,8 +254,11 @@ catch(PDOException $e)  {
       </div>
       <br><br>
       <div class="d-flex justify-content-center">
-        <button type="submit" class="btn btn-primary justify-content-center">Submit</button>
+        <button type="button" onclick="checkAdminInput();" class="btn btn-primary justify-content-center">Submit</button>
       </div>
+      <div  class="d-flex justify-content-center">
+        <span id="adminLoginErrorMessage" class='error-message'></span>
+     </div>
     </div>
     <br>
   </form>
