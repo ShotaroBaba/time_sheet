@@ -3,7 +3,6 @@
 
 
 function _checkAdminInput() {
-
     return $.ajax(
         {
             data: {
@@ -11,26 +10,29 @@ function _checkAdminInput() {
                 "adminPassword": $("#adminLoginPasswordInput").val()
             },
             dataType: "JSON",
-            url: "/employee/check_user_input.php",
-            method: "POST",
+            url: "/admin/check_user_input.php",
+            method: "POST"
         }
     )
 }
 
 function checkAdminInput(){
     
-    $.when(_checkEmployeeInput()).done(function(data) {
+    $.when(_checkAdminInput()).done(function(data) {
 
         if(data['login_success']){
+            console.log(data);
             $('#adminLogin').submit();
         }
         else
         {
+            console.log(data);
             $('#adminLoginErrorMessage').html("Password or user name incorrect.");
         }
 
     }).fail( function(data){
-
+        console.log(data);
+        console.log('failed');
         $('#adminLoginErrorMessage').html("Password or user name incorrect.");
     });
 };
