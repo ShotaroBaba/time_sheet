@@ -6,8 +6,8 @@ function _checkAdminInput() {
     return $.ajax(
         {
             data: {
-                "adminLoginID": $("#adminLoginIDInput").val(),
-                "adminPassword": $("#adminLoginPasswordInput").val()
+                "adminLoginIDInput": $("#adminLoginIDInput").val(),
+                "adminLoginPasswordInput": $("#adminLoginPasswordInput").val()
             },
             dataType: "JSON",
             url: "/admin/check_user_input.php",

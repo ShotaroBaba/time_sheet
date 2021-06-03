@@ -13,8 +13,8 @@ try {
   // done by modifying javascript.
 
   // If a cookie does not exist, then set the cookie for a user.
-  $admin_user_name=htmlspecialchars($_POST['adminLoginID']);
-  $admin_pass=htmlspecialchars($_POST['adminPassword']);
+  $admin_user_name=htmlspecialchars($_POST['adminLoginIDInput']);
+  $admin_pass=htmlspecialchars($_POST['adminLoginPasswordInput']);
 
   // The connection will return false if a value is false.
   $conn = new PDO("mysql:host=$host;dbname=$db;charset=utf8mb4", $admin_user_name, $admin_pass);

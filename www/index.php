@@ -27,7 +27,10 @@ try {
     header('Location: /employee/employee_time_sheet.php');
   }
 
-  
+  //**********************************************************
+  // Employee login processing part.
+  //**********************************************************
+
   // If a cookie does not exist, then set the cookie for a user.
   if(!empty($_POST['employeeLoginIDInput']) &&
      !empty($_POST['employeeLoginPasswordInput'])) {
@@ -136,6 +139,27 @@ try {
     exit(0);
 
   }
+
+  //**********************************************************
+  // Admin login processing part.
+  //**********************************************************
+  if(!empty($_POST['adminLoginIDInput']) &&
+  !empty($_POST['adminLoginPasswordInput'])) {
+      // Check user input twice to prevent the attack
+      // done by modifying javascript.
+    
+      // If a cookie does not exist, then set the cookie for a user.
+      $admin_user_name=htmlspecialchars($_POST['adminLoginIDInput']);
+      $admin_pass=htmlspecialchars($_POST['adminLoginPasswordInput']);
+    
+      // The connection will return false if a value is false.
+      $conn = new PDO("mysql:host=$host;dbname=$db;charset=utf8mb4", $admin_user_name, $admin_pass);
+      $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+      // If a connection is a success, then go to the admin php.
+      header('Location: /admin/admin_time_sheet_view.php');
+
+  }
 }
 
 catch(PDOException $e)  {
@@ -214,7 +238,7 @@ catch(PDOException $e)  {
 <div class="container">
   <div class="submit-center">
     If you have not registered your account as an employee, press the button below:  
-  </div>
+  </div>adminLoginPasswordInput
   <br>
   <div class="d-flex justify-content-center">
     <button type="button" onclick="window.location='employee_registration/employee_account_registration.php'" class="btn btn-primary btn-lg btn-block">Register</button>
@@ -248,9 +272,9 @@ catch(PDOException $e)  {
     </div>
     <br>
     <div class="form-group-sm row justify-content-center">
-      <label for="adminPasswordInput" class="col-sm-1 col-form-label">Password: </label>
+      <label for="adminLoginPasswordInput" class="col-sm-1 col-form-label">Password: </label>
       <div class="col-sm-3">
-        <input type="password" autocomplete="on" class="form-control" id="adminPasswordInput" aria-describedby="emailHelp" placeholder="Enter Password">
+        <input type="password" autocomplete="on" class="form-control" id="adminLoginPasswordInput" aria-describedby="emailHelp" placeholder="Enter Password">
       </div>
       <br><br>
       <div class="d-flex justify-content-center">

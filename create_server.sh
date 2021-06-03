@@ -134,7 +134,7 @@ sudo docker exec mysql_server \
 bash -c "mysql -uroot -hmysql_server -p"$(sudo decrypt_script/root_decrypt.sh)" \
  -e \"CREATE USER IF NOT EXISTS 'time_sheet_admin' IDENTIFIED WITH mysql_native_password BY '"$(sudo openssl rsautl -decrypt -inkey $priv_key -in $encrypted_table_admin_pass)"'\""
 
-# Replace sample with 
+# Replace sample with generated passwords. 
 cat www/.secret/.config_sample.php | \
 sed "s|_____time_sheet_pass_____|"$(sudo openssl rsautl -decrypt -inkey $priv_key -in $encrypted_table_client_pass)"|g" | \
 sed "s|_____pepper_string_____|"$pepper"|" > www/.secret/.config.php
