@@ -1,5 +1,8 @@
 <!-- Admin can check all time sheets of employees. -->
 
+
+<!-- TODO: Create an actual user list that is shown on this web page. -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,6 +12,6 @@
     <title>Admin Employee Manager</title>
 </head>
 <body>
-    
+    Success!!
 </body>
 </html>

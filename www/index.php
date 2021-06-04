@@ -159,6 +159,7 @@ try {
       // If a connection is a success, then go to the admin php.
       header('Location: /admin/admin_time_sheet_view.php');
 
+      exit(0);
   }
 }
 
@@ -238,7 +239,7 @@ catch(PDOException $e)  {
 <div class="container">
   <div class="submit-center">
     If you have not registered your account as an employee, press the button below:  
-  </div>adminLoginPasswordInput
+  </div>
   <br>
   <div class="d-flex justify-content-center">
     <button type="button" onclick="window.location='employee_registration/employee_account_registration.php'" class="btn btn-primary btn-lg btn-block">Register</button>
