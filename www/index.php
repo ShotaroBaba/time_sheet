@@ -14,18 +14,7 @@ $password_char=htmlspecialchars($_POST['employeeLoginPasswordInput']);
 
 try {
   
-  // Check user input twice to prevent the attack
-  // done by modifying javascript.
 
-  // TODO: The admin will automatically move to the
-  // webpage if it has his/her cookie.
-  if(!empty($_SESSION['adminCookie'])){
-
-  }
-
-  if(!empty($_SESSION['employeeCookie'])){
-    header('Location: /employee/employee_time_sheet.php');
-  }
 
   //**********************************************************
   // Employee login processing part.
@@ -143,18 +132,30 @@ try {
   //**********************************************************
   // Admin login processing part.
   //**********************************************************
-  if(!empty($_POST['adminLoginIDInput']) &&
-  !empty($_POST['adminLoginPasswordInput'])) {
-      // Check user input twice to prevent the attack
-      // done by modifying javascript.
+  if(!empty($_POST['adminLoginIDInput']) ||
+     !empty($_POST['adminLoginPasswordInput'])) {
     
       // If a cookie does not exist, then set the cookie for a user.
-      $admin_user_name=htmlspecialchars($_POST['adminLoginIDInput']);
-      $admin_pass=htmlspecialchars($_POST['adminLoginPasswordInput']);
-    
+      
       // The connection will return false if a value is false.
-      $conn = new PDO("mysql:host=$host;dbname=$db;charset=utf8mb4", $admin_user_name, $admin_pass);
-      $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+      // $conn = new PDO("mysql:host=$host;dbname=$db;charset=utf8mb4", 
+      // $_POST['adminLoginIDInput'],
+      // $_POST['adminLoginPasswordInput']);
+      // $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+      // Store session admin cookie.
+      // Create a session.
+      // session_name('admin_cookie');
+      
+      // // Set a large session length.
+      // session_start([
+      //   'sid_length' => 128
+      // ]);
+
+      $_SESSION['ipaddress']=$_SERVER['REMOTE_ADDR'];
+      $_SESSION['useragent']=$_SERVER['HTTP_USER_AGENT'];
+      $_SESSION['admin_user_name']=$admin_user_name;
+      $_SESSION['admin_pass']=$admin_pass;
 
       // If a connection is a success, then go to the admin php.
       header('Location: /admin/admin_time_sheet_view.php');
@@ -250,6 +251,8 @@ catch(PDOException $e)  {
 <hr/>
 <br>
 
+<?php echo htmlspecialchars($_POST['adminLoginIDInput']); ?>
+
 <!-- The below is a Admin user login. Used for adding, deleting employees manually, or 
   checking all employees time sheets. -->
 <div class="container">
@@ -258,7 +261,7 @@ catch(PDOException $e)  {
   </div>
   <br>
   <form
-  form id="adminLogin"
+  id="adminLogin"
   method="POST"  
   action="/" 
   class="d-flex row justify-content-center"
