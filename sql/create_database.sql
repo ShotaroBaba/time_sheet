@@ -60,6 +60,7 @@ CREATE TABLE IF NOT EXISTS `user_log` (
 CREATE TABLE IF NOT EXISTS `occupation` (
   `employee_type_id` INT auto_increment,
   `occupation_type` VARCHAR(64) NOT NULL,
+  `issue_date` DATETIME(6) DEFAULT '2000-01-01 00:00:00' NOT NULL,
   `wage` INT NOT NULL,
   PRIMARY KEY (`employee_type_id`),
   UNIQUE(`occupation_type`)

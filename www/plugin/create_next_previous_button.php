@@ -17,7 +17,6 @@ function generate_previous_next_button($min,$max,$current_pos){
         $min=(int)$min;
         $max=(int)$max;
         $current_pos=(int)$current_pos;
-        
         if($current_pos<$min || $max<$current_pos){
             echo "Unknown error";
             exit(1);

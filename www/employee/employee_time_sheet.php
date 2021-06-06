@@ -9,7 +9,10 @@ include "/var/www/html/plugin/create_next_previous_button.php";
 require_once("/var/www/html/plugin/strip_malicious_character.php");
 
 session_name('user_cookie');
-session_start();
+session_start([
+  'sid_length' => 128
+]);
+session_regenerate_id(true);
 
 // If this session value becomes empty.
 // then a user will move on to the top page.
@@ -37,6 +40,7 @@ if ($_SERVER['HTTP_USER_AGENT'] != $_SESSION['useragent'])
   exit(0);
 }
 
+// Very strict session time management.
 if(isset($_SESSION['expireAfter']) & time() > $_SESSION['expireAfter'] ){
   session_unset();
   session_destroy();
@@ -158,12 +162,10 @@ try {
     exit(1);
   }
 
-
-
   $total_result=$total_user_attendance_num->fetch();
 
   
-  // Injection attack prevention
+  // Injection attack prevention measure.
   $select_num_output=$_GET['t'] == '' || is_null($_GET['t']) ? 10 : htmlspecialchars($_GET['t']);
   $num_selection_output=$_GET['n']== '' || is_null($_GET['n']) ? 1 : htmlspecialchars($_GET['n']);
 
@@ -175,6 +177,7 @@ try {
   }
   echo $total_result['total_attend_num']/$select_num_output;
   $num_selection_output_tmp=$num_selection_output;
+
   // Prevent re-setting the number selection.
   if($num_selection_output>$select_max){
     $num_selection_output_tmp=$select_max;

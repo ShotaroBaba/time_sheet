@@ -132,35 +132,38 @@ try {
   //**********************************************************
   // Admin login processing part.
   //**********************************************************
-  if(!empty($_POST['adminLoginIDInput']) ||
+  if(!empty($_POST['adminLoginIDInput']) &&
      !empty($_POST['adminLoginPasswordInput'])) {
     
       // If a cookie does not exist, then set the cookie for a user.
       
       // The connection will return false if a value is false.
-      // $conn = new PDO("mysql:host=$host;dbname=$db;charset=utf8mb4", 
-      // $_POST['adminLoginIDInput'],
-      // $_POST['adminLoginPasswordInput']);
-      // $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+      $conn = new PDO("mysql:host=$host;dbname=$db;charset=utf8mb4", 
+      $_POST['adminLoginIDInput'],
+      $_POST['adminLoginPasswordInput']);
+      $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
       // Store session admin cookie.
       // Create a session.
-      // session_name('admin_cookie');
+      session_name('admin_cookie');
       
       // // Set a large session length.
-      // session_start([
-      //   'sid_length' => 128
-      // ]);
+      session_start([
+        'sid_length' => 128
+      ]);
 
       $_SESSION['ipaddress']=$_SERVER['REMOTE_ADDR'];
       $_SESSION['useragent']=$_SERVER['HTTP_USER_AGENT'];
-      $_SESSION['admin_user_name']=$admin_user_name;
-      $_SESSION['admin_pass']=$admin_pass;
+      $_SESSION['admin_user_name']=$_POST['adminLoginIDInput'];
+      $_SESSION['admin_pass']=$_POST['adminLoginPasswordInput'];
 
+
+      $_SESSION['expireAfter']= time()+$user_login_expiration_time;
+      
       // If a connection is a success, then go to the admin php.
       header('Location: /admin/admin_time_sheet_view.php');
 
-      exit(0);
+      // exit(0);
   }
 }
 
@@ -251,8 +254,6 @@ catch(PDOException $e)  {
 <hr/>
 <br>
 
-<?php echo htmlspecialchars($_POST['adminLoginIDInput']); ?>
-
 <!-- The below is a Admin user login. Used for adding, deleting employees manually, or 
   checking all employees time sheets. -->
 <div class="container">
@@ -270,7 +271,8 @@ catch(PDOException $e)  {
     <div class="form-group-sm row justify-content-center">
       <label for="adminLoginIDInput" class="col-sm-1 col-form-label">Login ID: </label>
       <div class="col-sm-3">
-        <input type="email" class="form-control" id="adminLoginIDInput" aria-describedby="emailHelp" placeholder="Enter LoginID">
+        <input type="email" class="form-control" id="adminLoginIDInput"
+        name="adminLoginIDInput" aria-describedby="emailHelp" placeholder="Enter LoginID">
       </div>
       <br>
     </div>
@@ -278,7 +280,8 @@ catch(PDOException $e)  {
     <div class="form-group-sm row justify-content-center">
       <label for="adminLoginPasswordInput" class="col-sm-1 col-form-label">Password: </label>
       <div class="col-sm-3">
-        <input type="password" autocomplete="on" class="form-control" id="adminLoginPasswordInput" aria-describedby="emailHelp" placeholder="Enter Password">
+        <input type="password" autocomplete="on" class="form-control" id="adminLoginPasswordInput" 
+        name="adminLoginPasswordInput" aria-describedby="emailHelp" placeholder="Enter Password">
       </div>
       <br><br>
       <div class="d-flex justify-content-center">
@@ -291,8 +294,3 @@ catch(PDOException $e)  {
     <br>
   </form>
 </div>
-<script>
-if ( window.history.replaceState ) {
-  window.history.replaceState( null, null, window.location.href );
-}
-</script>

@@ -1,0 +1,339 @@
+<?php 
+
+
+  // ******************************
+  // Set initial values
+  // ******************************
+
+  $is_valid_input=NULL;
+  $is_empty_input=NULL;
+  header("Content-Type: text/html;charset=UTF-8");
+  error_reporting(E_ALL ^ E_WARNING ^ E_NOTICE);
+  
+  include "/var/www/html/.secret/.config.php";
+  include "/var/www/html/plugin/create_next_previous_button.php";
+  session_name('admin_cookie');
+  session_start([
+    'sid_length' => 128
+  ]);
+  session_regenerate_id(true);
+
+  if((!empty($_GET['alter_occupation']) && strlen($_GET['alter_occupation']) > 1) || 
+  (!empty($_GET['insert_occupation']) && strlen($_GET['insert_occupation']) > 1)){
+    echo "Illegal URI variable(s) detected. Aborting.";
+    session_unset();
+    session_destroy();
+    header("Location: /");
+    exit(0);
+  }
+
+  try {
+    if(isset($_SESSION['expireAfter']) & time() > $_SESSION['expireAfter']){
+      session_unset();
+      session_destroy();
+      header('Location: /');
+      exit(0);
+    }
+    if(empty($_SESSION)){
+        session_unset();
+        session_destroy();
+        header('Location: /');
+        exit(0);
+    }
+    
+    // For preventing session hijacking.
+    if ($_SERVER['REMOTE_ADDR'] != $_SESSION['ipaddress'])
+    {
+        session_unset();
+        session_destroy();
+        header('Location: /');
+        exit(0);
+    }
+    
+    if ($_SERVER['HTTP_USER_AGENT'] != $_SESSION['useragent'])
+    {
+        session_unset();
+        session_destroy();
+        header('Location: /');
+        exit(0);
+    }
+
+    // *************************************
+    // Occupation View
+    //**************************************
+    if(empty($_SESSION['insert_occupation']) && empty($_GET['alter_occupation'])){
+
+      $conn= new PDO("mysql:host=$host;dbname=$db;charset=utf8mb4", 
+      $_SESSION['admin_user_name'], $_SESSION['admin_pass']);
+      $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+      
+      $total_occupation_num=$conn->prepare("SELECT COUNT(*) AS total_occupation_num FROM occupation;");
+
+      $total_occupation_num->bindValue(":_user_id", htmlspecialchars($_SESSION['employeeUserID']), PDO::PARAM_INT);
+
+      if($total_occupation_num->execute() < 1){
+        echo "Unknown error.";
+        exit(1);
+      }
+
+      $total_result=$total_occupation_num->fetch();
+
+      // Injection attack prevention measure.
+      $select_num_output=$_GET['t'] == '' || is_null($_GET['t']) ? 10 : htmlspecialchars($_GET['t']);
+      $num_selection_output=$_GET['n']== '' || is_null($_GET['n']) ? 1 : htmlspecialchars($_GET['n']);
+
+      // Set the limit of selection.
+      $select_min=1;
+      $select_max=intdiv($total_result['total_occupation_num'],$select_num_output);
+      if($total_result['total_occupation_num']/($select_num_output*$select_max) > 1 || $select_max ==0){
+        $select_max+=1;
+      }
+      
+      $num_selection_output_tmp=$num_selection_output;
+      // Prevent re-setting the number selection.
+      if($num_selection_output>$select_max){
+        $num_selection_output_tmp=$select_max;
+      }
+
+      $ocupation_selection_prepare=$conn->prepare('SELECT * FROM occupation;');
+
+      if($ocupation_selection_prepare->execute()<1){
+          echo "Unknown error";
+          exit(1);
+      }
+
+      $occupation_selection_result=$ocupation_selection_prepare->fetchAll(); 
+    }
+    
+
+
+    // *************************************
+    // Occpation Alter View
+    //**************************************
+    if(!empty($_GET['i']) && !empty($_GET['insert_occupation']) && empty($_GET['alter_occupation'])) {
+
+      // Check if a value is empty.
+      if(!empty($_GET['occupationName']) && !empty($_GET['wage'])) {
+
+        if(preg_match('/^[a-zA-Z0-9,\.\-]{1,}$/',$_GET['occupationName']) &&
+        preg_match('/^[0-9]{1,}$/',$_GET['wage'])) {
+          $is_valid_input=true;          
+        }
+        else{ 
+          $is_valid_input=false;
+        }
+      }
+      else {
+        $is_empty_input=true;
+      }
+    }
+
+
+    if(!empty($_GET['insert_occupation_processing'])) {
+
+    }
+    
+
+    // **************************************
+    // Occupation Insert View
+    // **************************************
+    if((!empty($_GET['alter_occupation'])) && empty($_GET['insert_occupation'])) {
+
+
+    }
+
+    $_SESSION['expireAfter']=time()+$user_login_expiration_time;
+
+  }
+
+  catch (PDOException $e) {
+    echo $e;
+    echo 'Unknown error';
+    exit(0);
+  }
+
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Occupation Manager</title>
+
+  <link href='/css/bootstrap.min.css?v=1' rel='stylesheet'>
+  <link href='/css/index.css?v=<?php echo time(); ?>' rel='stylesheet'>
+  <script src="/script/jquery-3.6.0.min.js"></script>
+  <script src="/script/popper.js?v=1"></script>
+  <script src="/script/bootstrap.bundle.min.js?v=1"></script>
+  <script src="/script/occupation_management.js?v=<?php echo time(); ?>"></script>
+
+</head>
+
+<?php if(empty($_GET['alter_occupation']) && empty($_GET['insert_occupation'])){ ?>
+<!-- Occupation View. -->
+<body>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Occupation ID</th>
+        <th>Occupation Type</th>
+        <th>Occupation Issued Time</th>
+        <th>Wage</th>
+      </tr>
+    </thead>
+    <tbody>
+      <?php 
+        $i=0;
+        foreach($occupation_selection_result as $v) {
+          $class_tag=$i%2==0?" class='grey-table-row'":"";
+          echo "<tr".$class_tag.">";
+          echo "<th>".$v['employee_type_id']."</th>";
+          echo "<th>".$v['occupation_type']."</th>";
+          echo "<th>".$v['issue_time']."</th>";
+          echo "<th>".$v['wage']."</th>";
+          echo "</tr>";
+          $i++;
+          }
+      ?>
+    </tbody>
+  </table>
+
+  <form id='adminForm'
+  method="GET" 
+  enctype="multipart/form-data" 
+  accept-charset="UTF-8">
+    
+    <input type="hidden" 
+    name="t" 
+    id="t" 
+    value="<?php echo $select_num_output;?>">
+    
+    <input 
+    type="hidden" 
+    name="n" 
+    id="n" 
+    value="<?php echo $num_selection_output;?>">
+
+    <input type="hidden" 
+    id="insert_occupation" 
+    name="insert_occupation"
+    value="<?php echo $_GET['insert_occupation']; ?>"
+    >
+        
+    <input 
+    type="hidden" 
+    id="alter_occupation" 
+    name="alter_occupation"
+    value="<?php echo $_GET['alter_occupation'];?>">
+
+    <div class="dropdown">
+      <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <?php
+          echo $select_num_output;
+        ?>
+      </button>
+      <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+        <li class="dropdown-item"  onclick="$('#t').val(10);$('#adminForm').submit();" value='10'>10</a>
+        <li class="dropdown-item"  onclick="$('#t').val(25);$('#adminForm').submit();"value='25'>25</a>
+        <li class="dropdown-item"  onclick="$('#t').val(50);$('#adminForm').submit();"value='50'>50</a>
+        <li class="dropdown-item"  onclick="$('#t').val(100);$('#adminForm').submit();"value='100'>100</a>
+      </ul>
+    </div>
+    
+    <button type="submit" class="btn btn-primary" onclick="$('#alter_occupation').val('t');">Change occupation detail</button>
+    <button type="submit" class="btn btn-primary" onclick="$('#insert_occupation').val('t');">Add occupation</button>
+    <button type="button" class="btn btn-primary" onclick="window.location='/admin/admin_time_sheet_view.php'">Return to user management</button>
+    
+    <nav aria-label="Page navigation example">
+      <ul class="pagination">
+      <?php 
+      generate_previous_next_button($select_min,$select_max,$num_selection_output_tmp);?>
+      </ul>
+    </nav>
+      
+  </form>
+
+</body>
+</html>
+
+<?php } ?>
+
+
+
+<?php if(!empty($_GET['insert_occupation']) && empty($_GET['alter_occupation'])) {?>
+<!-- Insert occupation -->
+
+<div class="container align-items-center">
+  <form id ="userInputMain" method="GET"  
+  action="/admin/occupation_management.php" 
+  class="d-flex row justify-content-center"
+  enctype="multipart/form-data" accept-charset="UTF-8">
+    
+    <input type="hidden" 
+    id="insert_occupation" 
+    name ="insert_occupation" 
+    value="<?php echo $_GET['insert_occupation'];?>">
+    
+    <input type="hidden" 
+    id="i"
+    name="i"
+    value="<?php echo $_GET['i'];?>">
+
+    <div class="form-group  col-sm-10">
+      <label for="occupationName">Occupation Name</label>
+      <input type="text" id="occupationName" 
+      name="occupationName" 
+      class="form-control" 
+      placeholder="*Required (Cannot use the same occupation name)"
+      value="<?php echo $_GET['occupationName'];?>">
+    </div>
+    <br><br><br>
+    <div class="col-sm-10">
+    </div>
+    <div class="form-group  col-sm-10">
+      <label for="wage">Wage</label>
+      <input type="text" id="wage" name="wage" 
+      class="form-control" 
+      placeholder="*Required"
+      value="<?php echo $_GET['wage'];?>">
+    </div>
+    <br><br><br>
+    <div class="form-group col-sm-10">
+      <hr/>
+    </div>
+    <br><br><br>
+
+  <div  class="d-flex justify-content-center">
+    <button type="submit" 
+    class="btn btn-primary" 
+    onclick="$('#i').val('t');$('#userInputMain').submit();">
+    Submit
+    </button>
+
+    <span id="errorMessage" class='error-message'>
+    <?php if(!$is_valid_input && !is_null($is_valid_input)){ 
+      echo "Invalid occupation information input.";
+    }
+    else if($is_empty_input){
+      echo "Either form is empty input.";
+    }
+    else {
+      echo "Occupation info has successfully been input.";
+    }
+    ?>
+    </span>
+  </div>
+  </form>
+</div>
+
+<?php } ?>
+
+
+
+<?php if((!empty($_GET['alter_occupation'])) && empty($_GET['insert_occupation'])) {?>
+<!-- Alter occupation -->
+
+<?php } ?>
