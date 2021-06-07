@@ -111,6 +111,7 @@
   <script src="/script/jquery-3.6.0.min.js"></script>
   <script src="/script/popper.js?v=1"></script>
   <script src="/script/bootstrap.bundle.min.js?v=1"></script>
+  <script src="/script/submit_func.js?v=<?php echo time(); ?>"></script>
 </head>
 
 

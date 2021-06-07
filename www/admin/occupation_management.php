@@ -7,6 +7,7 @@
 
   $is_valid_input=NULL;
   $is_empty_input=NULL;
+  $is_input_complete=false;
   header("Content-Type: text/html;charset=UTF-8");
   error_reporting(E_ALL ^ E_WARNING ^ E_NOTICE);
   
@@ -111,13 +112,31 @@
     // Occpation Alter View
     //**************************************
     if(!empty($_GET['i']) && !empty($_GET['insert_occupation']) && empty($_GET['alter_occupation'])) {
-
+      
       // Check if a value is empty.
       if(!empty($_GET['occupationName']) && !empty($_GET['wage'])) {
+        
+        $is_empty_input=false;
+        if(preg_match('/^[a-zA-Z0-9,\.\-\s]{1,}$/',$_GET['occupationName']) &&
+        preg_match('/^[1-9][0-9]*$/',$_GET['wage'])) {
+          
+          $is_valid_input=true;
+          
+          // If both inputs are valid and non-empty, then insert data into occupation table.
+          $insert_new_occupation_prepare=
+          $conn->prepare('INSERT INTO `occupation` (`occupation_type`,`issue_time`,`wage`) 
+          VALUES (:occupation_type,SYSDATE(6),:wage)');
+          
+          $insert_new_occupation_prepare->bindValue(':occupation_type',htmlspecialchars($_GET['occupationName']),PDO::PARAM_STR);
+          $insert_new_occupation_prepare->bindValue(':wage',htmlspecialchars($_GET['wage']),PDO::PARAM_INT);
+          
+          if($insert_new_occupation_prepare->execute() < 1){
+            echo "Unknown error";
+            exit(1);
+          }
 
-        if(preg_match('/^[a-zA-Z0-9,\.\-]{1,}$/',$_GET['occupationName']) &&
-        preg_match('/^[0-9]{1,}$/',$_GET['wage'])) {
-          $is_valid_input=true;          
+          $is_input_complete=true;
+          
         }
         else{ 
           $is_valid_input=false;
@@ -129,11 +148,6 @@
     }
 
 
-    if(!empty($_GET['insert_occupation_processing'])) {
-
-    }
-    
-
     // **************************************
     // Occupation Insert View
     // **************************************
@@ -142,12 +156,16 @@
 
     }
 
+    // Add time to session cookie.
     $_SESSION['expireAfter']=time()+$user_login_expiration_time;
 
   }
 
   catch (PDOException $e) {
     echo $e;
+    echo "<br><br>";
+    echo  $e->getCode();
+    echo "<br>";
     echo 'Unknown error';
     exit(0);
   }
@@ -169,6 +187,7 @@
   <script src="/script/popper.js?v=1"></script>
   <script src="/script/bootstrap.bundle.min.js?v=1"></script>
   <script src="/script/occupation_management.js?v=<?php echo time(); ?>"></script>
+  <script src="/script/submit_func.js?v=<?php echo time(); ?>"></script>
 
 </head>
 
@@ -181,7 +200,7 @@
         <th>Occupation ID</th>
         <th>Occupation Type</th>
         <th>Occupation Issued Time</th>
-        <th>Wage</th>
+        <th>Wage Per Hour</th>
       </tr>
     </thead>
     <tbody>
@@ -309,21 +328,32 @@
   <div  class="d-flex justify-content-center">
     <button type="submit" 
     class="btn btn-primary" 
-    onclick="$('#i').val('t');$('#userInputMain').submit();">
+    onclick="$('#i').val('t');submitValues('#wage','#occupationName','#i','#insert_occupation');
+    $('#userInputMain').submit();">
     Submit
     </button>
 
-    <span id="errorMessage" class='error-message'>
+    <span id="errorMessage" class='<?php
+    if($is_input_complete){
+      echo "complete-message";
+    }
+    else{
+      echo "error-message";
+    }
+    ?>'>
+
     <?php if(!$is_valid_input && !is_null($is_valid_input)){ 
       echo "Invalid occupation information input.";
     }
-    else if($is_empty_input){
+    else if($is_empty_input && !is_null($is_empty_input)){
       echo "Either form is empty input.";
     }
-    else {
+    else if($is_input_complete) {
       echo "Occupation info has successfully been input.";
+      echo "<script type='text/javascript'>removeUserInput()</script>";
     }
     ?>
+    
     </span>
   </div>
   </form>
