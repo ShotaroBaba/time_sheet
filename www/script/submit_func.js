@@ -12,3 +12,17 @@ function submitValues(...args){
     }
 
 }
+
+function submitAlterButton(){
+    $('#alter_occupation').val('t');
+    $('#n').val('');
+    $('#t').val('');
+    submitValues('#t','#i','#n','#insert_occupation','#alter_occupation','#employee_type_id');
+}
+
+function submitChangeButton(){
+    $('#change_occupation').val('t');
+    $('#n').val('');
+    $('#t').val('');
+    submitValues('#t','#i','#n','#insert_occupation','#change_occupation','#employee_type_id');
+}

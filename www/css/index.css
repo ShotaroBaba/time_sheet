@@ -28,3 +28,7 @@ thead.dark-head{
 tr.grey-table-row{
     background-color: #e0e0e0;
 }
+
+button.button-size-small{
+    font-size: x-small;
+}

@@ -192,7 +192,7 @@ catch(PDOException $e)  {
 <!-- Load script  -->
 <script src="/script/check_employee_login.js?v=<?php echo time(); ?>"></script>
 <script src="/script/check_admin_login.js?v=<?php echo time(); ?>"></script>
-
+<title>Employee Time Sheet Viewer</title>
 
 <div class="container">
 <div class="row">

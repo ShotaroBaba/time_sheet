@@ -109,48 +109,67 @@
   <link href='/css/bootstrap.min.css?v=1' rel='stylesheet'>
   <link href='/css/index.css?v=<?php echo time(); ?>' rel='stylesheet'>
   <script src="/script/jquery-3.6.0.min.js"></script>
-  <script src="/script/popper.js?v=1"></script>
-  <script src="/script/bootstrap.bundle.min.js?v=1"></script>
+  <script src="/script/popper.js?v=<?php echo time(); ?>"></script>
+  <script src="/script/bootstrap.bundle.min.js?v=<?php echo time(); ?>"></script>
   <script src="/script/submit_func.js?v=<?php echo time(); ?>"></script>
 </head>
 
 
 <body>
-  <table class="table">
-    <thead>
-      <th>User ID</th>
-      <th>First Name</th>
-      <th>Middle Name</th>
-      <th>Last Name</th>
-      <th>Phone Number</th>
-      <th>Address</th>
-      <th>Email</th>
-      <th>State</th>
-    </thead>
-    <tbody>
-    <?php 
-      $i=0;
-      foreach ($user_selection_result as $v) {
-        $class_tag=$i%2==0?" class='grey-table-row'":"";
-        echo "<tr".$class_tag.">";
-        echo "<th>".$v['user_id']."</th>";
-        echo "<th>".$v['first_name']."</th>";
-        echo "<th>".$v['middle_name']."</th>";
-        echo "<th>".$v['last_name']."</th>";
-        echo "<th>".$v['phone_number']."</th>";
-        echo "<th>".$v['email']."</th>";
-        echo "<th>".$v['address']."</th>";
-        echo "<th>".$v['state']."</th>";
-        echo "</tr>";
-        $i++;
-      }
-    ?>
-    </tbody> 
-  </table>   
+  <form id="admin"
+  method="GET"
+  enctype="multipart/form-data"
+  accept-charset="UTF-8">
+  
+    <table class="table">
+      <thead>
+        <th>User ID</th>
+        <th>First Name</th>
+        <th>Middle Name</th>
+        <th>Last Name</th>
+        <th>Phone Number</th>
+        <th>Address</th>
+        <th>Email</th>
+        <th>State</th>
+        <th></th>
+        <th></th>
+        
+      </thead>
+      <tbody>
+      <?php 
+        $i=0;
+        foreach ($user_selection_result as $v) {
+          $class_tag=$i%2==0?" class='grey-table-row'":"";
+          echo "<tr".$class_tag.">";
+          echo "<th>".$v['user_id']."</th>";
+          echo "<th>".$v['first_name']."</th>";
+          echo "<th>".$v['middle_name']."</th>";
+          echo "<th>".$v['last_name']."</th>";
+          echo "<th>".$v['phone_number']."</th>";
+          echo "<th>".$v['email']."</th>";
+          echo "<th>".$v['address']."</th>";
+          echo "<th>".$v['state']."</th>";
 
-<button class="btn btn-success" onclick="window.location='/admin/occupation_management.php'">
-  Change to occupation manager
-</button>
+          echo "<th><button class='btn btn-success button-size-small'
+          id='user_".$v['user_id']."' 
+          >Change Detail</button></th>";
+          echo "<th><button class='btn btn-success'
+          id='user_".$v['user_id']."' 
+          
+          >Delete</button></th>";
+
+          echo "</tr>";
+          $i++;
+        }
+      ?>
+      </tbody> 
+    </table>   
+
+    <button type="button" class="btn btn-success" onclick="window.location='/admin/occupation_management.php'">
+      Change to occupation manager
+    </button>
+  </form>
+
 
 </body>
 </html>
