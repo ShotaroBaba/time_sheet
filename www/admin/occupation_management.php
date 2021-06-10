@@ -8,8 +8,10 @@
   $is_valid_input=NULL;
   $is_empty_input=NULL;
   $is_input_complete=false;
+  $is_delete_complete=false;
   $is_input_duplicate=false;
   $a_select_result=NULL;
+
   header("Content-Type: text/html;charset=UTF-8");
   error_reporting(E_ALL ^ E_WARNING ^ E_NOTICE);
   
@@ -70,6 +72,32 @@
     // *************************************
     // Occupation View
     //**************************************
+
+    // Delete the element first if a element is not empty.
+    if(!empty($_GET['delete_occupation'])){
+      
+      // Validate employee_type_id input
+      if(preg_match('/^[1-9][0-9]*$/',$_GET['employee_type_id'])) {
+
+        $delete_occupation_prepare=$conn->
+        prepare('DELETE FROM `occupation` WHERE `employee_type_id` = :employee_type_id');
+
+        $delete_occupation_prepare->bindValue(':employee_type_id',
+        htmlspecialchars($_GET['employee_type_id']),
+        PDO::PARAM_INT);
+        
+        if($delete_occupation_prepare->execute()<1) {
+          echo "Unkonwn error";
+          exit(1);
+        } 
+        
+        // Set true once all deletion progress has completed.
+        $is_delete_complete=true;
+
+      }
+
+    }
+
     if(empty($_GET['insert_occupation']) && 
     empty($_GET['alter_occupation'])){
       
@@ -113,6 +141,11 @@
     
     }
     
+    // *******************************
+    // End of Occupation
+    // *******************************
+    
+
 
 
     // *************************************
@@ -156,6 +189,8 @@
     // ******************************
     // End of Occupation Insert *****
     // ******************************
+
+
 
 
 
@@ -227,18 +262,7 @@
     // End of Occupation Alteration
     // *******************************************
     
-
-    // *******************************************
-    // Occupation Deletion
-    // *******************************************
-    if((!empty($_GET['delete_occupation']))){
-
-    }
-    // *******************************************
-    // End of Occupation Deletion
-    // *******************************************
-    
-    // Add time to session cookie.
+    // Add time to session cookie if everything finishes.
     $_SESSION['expireAfter']=time()+$user_login_expiration_time;
 
   }
@@ -396,9 +420,18 @@
     </ul>
   </nav>
   <?php if($is_delete_complete){ ?>
+
     <span class="complete-message">
-      The occupation info deletion completed.
+      The occupation deletion completed.
     </span>
+  
+    <script type='text/javascript'>
+      
+      // Change URI content.
+      window.history.replaceState(NULL, 
+      'Occupation Manager', 
+      '/admin/occupation_management.php');
+    </script>
   <?php }  ?>
   
   
