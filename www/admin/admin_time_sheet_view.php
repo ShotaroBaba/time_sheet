@@ -9,6 +9,9 @@
     'sid_length' => 128
   ]);
   
+  $is_valid_input=NULL;
+  $is_delete_complete=false;
+
   // Change session ID to prevent session hijacking.
   session_regenerate_id(true);
 
@@ -39,7 +42,9 @@
 
     if(isset($_SESSION['expireAfter']) & time() > $_SESSION['expireAfter']){
       session_unset();
-      session_destroy();
+      session_destroy();    // ******************************
+      // Display User table
+      // ******************************
       header('Location: /');
       exit(0);
     }
@@ -47,49 +52,196 @@
     $conn= new PDO("mysql:host=$host;dbname=$db;charset=utf8mb4", 
     $_SESSION['admin_user_name'], $_SESSION['admin_pass']);
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-    $total_user_num=$conn->prepare("SELECT COUNT(*) FROM user;");
-
-    $total_user_num->bindValue(":_user_id", htmlspecialchars($_SESSION['employeeUserID']), PDO::PARAM_INT);
-
-    if($total_user_num->execute() < 1){
-      echo "Unknown error.";
-      exit(1);
-    }
-
-    $total_result=$total_user_num->fetch();
-
-    // Injection attack prevention measure.
-    $select_num_output=$_GET['t'] == '' || is_null($_GET['t']) ? 10 : htmlspecialchars($_GET['t']);
-    $num_selection_output=$_GET['n']== '' || is_null($_GET['n']) ? 1 : htmlspecialchars($_GET['n']);
-
-    // Set the limit of selection.
-    $select_min=1;
-    $select_max=intdiv($total_result['total_attend_num'],$select_num_output);
-    if($total_result['total_attend_num']/($select_num_output*$select_max) > 1 || $select_max ==0){
-      $select_max+=1;
-    }
-    echo $total_result['total_attend_num']/$select_num_output;
-    $num_selection_output_tmp=$num_selection_output;
     
-    // Prevent re-setting the number selection.
-    if($num_selection_output>$select_max){
-      $num_selection_output_tmp=$select_max;
+
+
+    // *******************************
+    // Delete User Part
+    // *******************************
+
+    if(!empty($_REQUEST['delete_user_detail'])){
+
+      if(preg_match('/^[1-9][0-9]*$/',$_REQUEST['user_id'])){
+        $delete_user_prepare=$conn->prepare("DELETE FROM user WHERE user_id=:user_id;");
+        
+        $delete_user_prepare->bindValue(":user_id",
+        htmlspecialchars($_REQUEST['user_id']),
+        PDO::PARAM_INT);
+
+        if($delete_user_prepare->execute() < 1){
+          echo "Unknown error";
+          exit(1);
+        }
+        $is_delete_complete=true;
+
+      }
     }
 
+    // ******************************
+    // Delete User Part End
+    // *******************************
+    
 
-    $user_selection_prepare=$conn->prepare('SELECT * FROM user;');
+    // ******************************
+    // Display User table
+    // ******************************
+    
+    if(empty($_REQUEST['change_user_detail'])){
 
-    if($user_selection_prepare->execute()<1){
-        echo "Unknown error";
+      $total_user_num=$conn->prepare("SELECT COUNT(*) FROM user;");
+
+      if($total_user_num->execute() < 1){
+        echo "Unknown error.";
         exit(1);
-    }
+      }
 
-    $user_selection_result=$user_selection_prepare->fetchAll();
+      $total_result=$total_user_num->fetch();
+
+      // Injection attack prevention measure.
+      $select_num_output=$_REQUEST['t'] == '' || is_null($_REQUEST['t']) ? 10 : htmlspecialchars($_REQUEST['t']);
+      $num_selection_output=$_REQUEST['n']== '' || is_null($_REQUEST['n']) ? 1 : htmlspecialchars($_REQUEST['n']);
+
+      // Set the limit of selection.
+      $select_min=1;
+      $select_max=intdiv($total_result['total_attend_num'],$select_num_output);
+      if($total_result['total_attend_num']/($select_num_output*$select_max) > 1 || $select_max ==0){
+        $select_max+=1;
+      }
+
+      $num_selection_output_tmp=$num_selection_output;
+      
+      // Prevent re-setting the number selection.
+      if($num_selection_output>$select_max){
+        $num_selection_output_tmp=$select_max;
+      }
+
+
+      $user_selection_prepare=$conn->prepare('SELECT * FROM user;');
+
+      if($user_selection_prepare->execute()<1){
+          echo "Unknown error";
+          exit(1);
+      }
+
+
+      $user_selection_result=$user_selection_prepare->fetchAll();
+      
+    }
+    
+    // ******************************
+    // Display User table End
+    // ******************************
+
+
+    // ********************************************
+    // Employee Detail Change 
+    // ********************************************
+
+
+    if(!empty($_REQUEST['change_user_detail']) && !empty($_REQUEST['user_id'])){
+      
+      if(!empty($_REQUEST['i'])){
+        
+        if(preg_match('/^[1-9][0-9]*$/',$_REQUEST['user_id']) &&
+        preg_match('/^.+$/',$_REQUEST['firstName']) &&
+        preg_match('/^.*$/',$_REQUEST['middleName']) &&
+        preg_match('/^.+$/',$_REQUEST['lastName']) &&
+        preg_match('/^[0-9\-]+$/',$_REQUEST['phoneNumber']) &&
+        preg_match('/^.+$/',$_REQUEST['address']) &&
+        preg_match('/^.+$/',$_REQUEST['email']))
+        {
+          echo "Success!!<br><br>";
+          $is_valid_input=true;
+        
+          $change_user_detail_prepare=$conn->prepare("UPDATE user 
+          SET `first_name` = :first_name,
+          `middle_name` = :middle_name,
+          `last_name` = :last_name,
+          `phone_number`=:phone_number,
+          `address` = :_address,
+          `email` = :email WHERE
+          user_id=:user_id");
+          
+          ////////////////////////////////////
+          // Bind values 
+          ////////////////////////////////////
+          $change_user_detail_prepare->bindValue(":first_name",
+          htmlspecialchars($_REQUEST['firstName']),
+          PDO::PARAM_STR);
+
+          $change_user_detail_prepare->bindValue(":middle_name",
+          htmlspecialchars($_REQUEST['middleName']),
+          PDO::PARAM_STR);
+          
+          $change_user_detail_prepare->bindValue(":last_name",
+          htmlspecialchars($_REQUEST['lastName']),
+          PDO::PARAM_STR);
+          
+          $change_user_detail_prepare->bindValue(":phone_number",
+          htmlspecialchars($_REQUEST['phoneNumber']),
+          PDO::PARAM_STR);
+
+          $change_user_detail_prepare->bindValue(":_address",
+          htmlspecialchars($_REQUEST['address']),
+          PDO::PARAM_STR);
+
+          $change_user_detail_prepare->bindValue(":email", 
+          htmlspecialchars($_REQUEST['email']), 
+          PDO::PARAM_STR);
+
+          $change_user_detail_prepare->bindValue(":user_id",
+          htmlspecialchars($_REQUEST['user_id']), 
+          PDO::PARAM_INT);
+          
+          
+          ////////////////////////////////////
+          // End of substitution
+          ////////////////////////////////////
+
+          if($change_user_detail_prepare->execute()<1){
+            echo 'Unknown error';
+            exit(1);
+          }
+
+          $is_input_complete=true;
+
+        }
+        
+        else {
+          $is_valid_input=false;
+        }
+        
+      }
+
+      if(preg_match('/^[1-9][0-9]*$/',$_REQUEST['user_id'])
+      ){
+        
+        $select_user_prepare=$conn->prepare('SELECT * FROM user WHERE user_id= :user_id');
+        $select_user_prepare->bindValue(':user_id',htmlspecialchars($_REQUEST['user_id']),PDO::PARAM_INT);
+      
+        if($select_user_prepare->execute()<1) {
+          echo "Unknown error";
+          exit(1);
+        }
+
+        $select_user_result=$select_user_prepare->fetch();
+        print_r($select_user_result);
+
+      }
+
+    }
+    
+
+    // *********************************************
+    // Employee Detail Change End
+    // *********************************************
+    
+
     $_SESSION['expireAfter']=time()+$user_login_expiration_time;  
 
   }
   catch (PDOException $e) {
+    echo $e;
     echo 'Unknown error';
     exit(0);
   }
@@ -112,15 +264,33 @@
   <script src="/script/popper.js?v=<?php echo time(); ?>"></script>
   <script src="/script/bootstrap.bundle.min.js?v=<?php echo time(); ?>"></script>
   <script src="/script/submit_func.js?v=<?php echo time(); ?>"></script>
+  <script src="/script/admin_user_management.js?v=<?php echo time(); ?>"></script>
 </head>
 
 
+<?php if(empty($_REQUEST['change_user_detail'])) { ?>
 <body>
-  <form id="admin"
+  <form id="adminForm"
   method="GET"
   enctype="multipart/form-data"
   accept-charset="UTF-8">
-  
+
+    <input type="hidden" 
+    id="change_user_detail"
+    name="change_user_detail"
+    value="<?php echo $_REQUEST['change_user_detail'];?>">
+
+    <input type="hidden"
+    id="delete_user_detail"
+    name="delete_user_detail"
+    value="<?php echo $_REQUEST['delete_user_detail'];?>">
+
+    <input type="hidden"
+    id='user_id'
+    name=user_id
+    value=''>
+
+
     <table class="table">
       <thead>
         <th>User ID</th>
@@ -128,9 +298,9 @@
         <th>Middle Name</th>
         <th>Last Name</th>
         <th>Phone Number</th>
-        <th>Address</th>
         <th>Email</th>
-        <th>State</th>
+        <th>Address</th>
+        <th>Occupation</th>
         <th></th>
         <th></th>
         
@@ -142,21 +312,28 @@
           $class_tag=$i%2==0?" class='grey-table-row'":"";
           echo "<tr".$class_tag.">";
           echo "<th>".$v['user_id']."</th>";
-          echo "<th>".$v['first_name']."</th>";
+          echo "<th id=firstName_".$v['user_id'].">".$v['first_name']."</th>";
           echo "<th>".$v['middle_name']."</th>";
-          echo "<th>".$v['last_name']."</th>";
+          echo "<th id=lastName_".$v['user_id'].">".$v['last_name']."</th>";
           echo "<th>".$v['phone_number']."</th>";
           echo "<th>".$v['email']."</th>";
           echo "<th>".$v['address']."</th>";
           echo "<th>".$v['state']."</th>";
 
-          echo "<th><button class='btn btn-success button-size-small'
+
+          echo "<th><button type='button' 
+          class='btn btn-success button-size-small'
           id='user_".$v['user_id']."' 
+          onclick='changeUserDetail(".$v['user_id'].")'
           >Change Detail</button></th>";
-          echo "<th><button class='btn btn-success'
-          id='user_".$v['user_id']."' 
           
+
+          echo "<th><button type='button' 
+          class='btn btn-success'
+          id='user_".$v['user_id']."' 
+          onclick='deleteUserDetail(".$v['user_id'].")'
           >Delete</button></th>";
+
 
           echo "</tr>";
           $i++;
@@ -168,8 +345,172 @@
     <button type="button" class="btn btn-success" onclick="window.location='/admin/occupation_management.php'">
       Change to occupation manager
     </button>
-  </form>
+    
+    <?php if($is_delete_complete){ ?>
+    <span id="errorMessage" class='complete-message'> 
+      User input deletion completed.
+    </span>
+    <?php } ?>
 
+  </form>
+  
+  <?php if($is_delete_complete){ ?>
+    <script type='text/javascript'>    
+      window.history.replaceState(NULL, 'Occupation Manager', '/admin/admin_time_sheet_view.php');
+    </script>";
+  <?php } ?>
 
 </body>
+<?php } ?>
+
+<?php if(!empty($_REQUEST['change_user_detail'])){ ?>
+<body>
+<!-- ------------------------------------------ -->
+<!-- Change User Detail ---------------------- -->
+<!-- ----------------------------------------- -->
+
+<!-- Change GET method to POSt method to stop the leak of private info -->
+  <form id ="adminForm" method="POST"  
+  action="/admin/admin_time_sheet_view.php" 
+  class="d-flex row justify-content-center"
+  enctype="multipart/form-data" accept-charset="UTF-8">
+
+    <input type="hidden" 
+    id="change_user_detail" 
+    name ="change_user_detail" 
+    value="<?php echo $_REQUEST['change_user_detail'];?>">
+    
+    <input type="hidden" 
+    id="delete_user_detail"
+    name="delete_user_detail" 
+    value="<?php echo $_REQUEST['delete_user_detail'];?>">
+
+    <input type="hidden" 
+    id="i"
+    name="i"
+    value="<?php echo $_REQUEST['i'];?>">
+
+    <input type="hidden" 
+    id="user_id"
+    name="user_id"
+    value="<?php echo $_REQUEST['user_id'];?>">
+
+    <div class="form-group  col-sm-10">
+      <label for="firstName">First Name</label>
+      <input type="text" id="firstName" 
+      name="firstName" 
+      class="form-control" 
+      placeholder="*Required (Current first name: <?php echo($select_user_result['first_name'])?>)"
+      value="<?php echo($select_user_result['first_name']); ?>"
+      data-defaut-value="<?php echo($select_user_result['first_name']); ?>">
+    </div>
+    <br><br><br>
+
+    <div class="form-group  col-sm-10">
+      <label for="middleName">Middle Name</label>
+      <input type="text" id="middleName" 
+      name="middleName" 
+      class="form-control" 
+      placeholder="*Required (Current middle name: <?php echo($select_user_result['middle_name'])?>)"
+      value="<?php echo($select_user_result['middle_name']); ?>"
+      data-default-value="<?php echo($select_user_result['middle_name']); ?>">
+    </div>
+    
+    <br><br><br>
+    <div class="form-group  col-sm-10">
+      <label for="lastName">Last Name</label>
+      <input type="text" id="lastName" 
+      name="lastName" 
+      class="form-control" 
+      placeholder="*Required (Current last name: <?php echo($select_user_result['last_name'])?>)"
+      value="<?php echo($select_user_result['last_name']); ?>"
+      data-default-value="<?php echo($select_user_result['last_name']); ?>">
+      <br>
+      <hr/>
+    </div>
+
+    <div class="form-group  col-sm-10">
+      <label for="address">Address</label>
+      <input type="text" id="address" name="address" 
+      class="form-control" 
+      placeholder="*Required (Current address: <?php echo($select_user_result['address'])?>)"
+      value="<?php echo($select_user_result['address']);?>"
+      data-default-value="<?php echo($select_user_result['address']);?>">
+    </div>
+
+    <div class="form-group  col-sm-10">
+      <label for="phoneNumber">Phone Number</label>
+      <input type="text" id="phoneNumber" name="phoneNumber" 
+      class="form-control" 
+      placeholder="*Required (Current address: <?php echo($select_user_result['phone_number'])?>)"
+      value="<?php echo($select_user_result['phone_number']);?>"
+      data-default-value="<?php echo($select_user_result['phone_number']);?>">
+    </div>
+
+    <div class="form-group  col-sm-10">
+      <label for="email">Email</label>
+      <input type="text" id="email" name="email" 
+      class="form-control" 
+      placeholder="*Required (Current email: <?php echo($select_user_result['email'])?>)"
+      value="<?php echo($select_user_result['email']);?>"
+      data-default-value="<?php echo($select_user_result['email']);?>">
+    </div>
+
+
+    <br><br><br>
+    <div class="form-group col-sm-10">
+      <hr/>
+    </div>
+    <br><br><br>
+
+    <div class="d-flex justify-content-center">
+      <button type="submit" 
+      class="btn btn-success" 
+      onclick="
+      $('#i').val('t');
+      $('#adminForm').submit();">
+      Change User Detail
+      </button>  
+      &nbsp;&nbsp;&nbsp;
+      <button type="button" class="btn btn-success" 
+      onclick="window.location='/admin/admin_time_sheet_view.php'">Return to occupation view</button>
+    
+
+      <span id="errorMessage" class='<?php
+      if($is_input_complete){
+        echo "complete-message";
+      }
+      else{
+        echo "error-message";
+      }
+      ?>'>
+
+      <?php 
+      
+        if(!$is_valid_input && !is_null($is_valid_input)){ 
+          echo "Invalid occupation information input.";
+        }
+
+        else if($is_input_complete) {
+          echo "Occupation info has successfully been input.";
+          echo "<script type='text/javascript'>
+          
+          // Removing user's input
+          
+          removeUserInput();
+          // Change browser's URI display.
+
+          window.history.replaceState(NULL, 'Occupation Manager', '/admin/admin_time_sheet_view.php');
+          </script>";
+        }
+
+      ?>
+      </span>
+    </div>
+  </form>
+
+</body>
+<?php }?>
+
+
 </html>
