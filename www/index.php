@@ -161,7 +161,7 @@ try {
       $_SESSION['expireAfter']= time()+$user_login_expiration_time;
       
       // If a connection is a success, then go to the admin php.
-      header('Location: /admin/admin_time_sheet_view.php');
+      header('Location: /admin/admin_user_management.php');
 
       // exit(0);
   }

@@ -30,3 +30,21 @@ function changeUserDetail(userID) {
     $('#adminForm').submit();
 
 }
+
+function showUserTimeTable(userID){
+    
+    $('#show_user_time_sheet').val('t');
+    $('#n').val('');
+    $('#t').val('');
+    $('#i').val('');
+    
+    $('#user_id').val(userID);
+    
+    submitValues('#t','#i','#n',
+    '#insert_occupation','#user_id',
+    '#change_user_detail','#delete_user_detail');
+    
+    $('#adminForm').attr('action','/admin/admin_time_sheet_management.php');
+
+    $('#adminForm').submit();
+}

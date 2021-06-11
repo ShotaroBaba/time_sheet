@@ -116,7 +116,7 @@
       }
 
 
-      $user_selection_prepare=$conn->prepare('SELECT * FROM user;');
+      $user_selection_prepare=$conn->prepare('SELECT * FROM user JOIN occupation USING (employee_type_id);');
 
       if($user_selection_prepare->execute()<1){
           echo "Unknown error";
@@ -137,7 +137,6 @@
     // Employee Detail Change 
     // ********************************************
 
-
     if(!empty($_REQUEST['change_user_detail']) && !empty($_REQUEST['user_id'])){
       
       if(!empty($_REQUEST['i'])){
@@ -148,9 +147,10 @@
         preg_match('/^.+$/',$_REQUEST['lastName']) &&
         preg_match('/^[0-9\-]+$/',$_REQUEST['phoneNumber']) &&
         preg_match('/^.+$/',$_REQUEST['address']) &&
-        preg_match('/^.+$/',$_REQUEST['email']))
+        preg_match('/^.+$/',$_REQUEST['email']) && 
+        preg_match('/^[1-9][0-9]+$/',$_REQUEST['employee_type_id']))
         {
-          echo "Success!!<br><br>";
+        
           $is_valid_input=true;
         
           $change_user_detail_prepare=$conn->prepare("UPDATE user 
@@ -159,7 +159,8 @@
           `last_name` = :last_name,
           `phone_number`=:phone_number,
           `address` = :_address,
-          `email` = :email WHERE
+          `email` = :email,
+          `employee_type_id`= :employee_type_id WHERE
           user_id=:user_id");
           
           ////////////////////////////////////
@@ -193,6 +194,9 @@
           htmlspecialchars($_REQUEST['user_id']), 
           PDO::PARAM_INT);
           
+          $change_user_detail_prepare->bindValue(":employee_type_id",
+          htmlspecialchars($_REQUEST['employee_type_id']),
+          PDO::PARAM_INT);
           
           ////////////////////////////////////
           // End of substitution
@@ -216,7 +220,18 @@
       if(preg_match('/^[1-9][0-9]*$/',$_REQUEST['user_id'])
       ){
         
-        $select_user_prepare=$conn->prepare('SELECT * FROM user WHERE user_id= :user_id');
+        // Select all oocupations and its ids to display
+        $select_all_occupations_prepare=$conn->prepare("SELECT * FROM occupation WHERE NOT employee_type_id = 1;");
+
+        if($select_all_occupations_prepare->execute() < 1){
+          echo 'Unknown error';
+          exit(1);
+        }
+
+        $select_all_occupations_result=$select_all_occupations_prepare->fetchAll();
+
+        // Select all users with their occupations.
+        $select_user_prepare=$conn->prepare('SELECT * FROM user JOIN occupation USING  (`employee_type_id`)  WHERE user_id = :user_id');
         $select_user_prepare->bindValue(':user_id',htmlspecialchars($_REQUEST['user_id']),PDO::PARAM_INT);
       
         if($select_user_prepare->execute()<1) {
@@ -225,7 +240,6 @@
         }
 
         $select_user_result=$select_user_prepare->fetch();
-        print_r($select_user_result);
 
       }
 
@@ -241,7 +255,6 @@
 
   }
   catch (PDOException $e) {
-    echo $e;
     echo 'Unknown error';
     exit(0);
   }
@@ -271,7 +284,7 @@
 <?php if(empty($_REQUEST['change_user_detail'])) { ?>
 <body>
   <form id="adminForm"
-  method="GET"
+  method="POST"
   enctype="multipart/form-data"
   accept-charset="UTF-8">
 
@@ -295,12 +308,13 @@
       <thead>
         <th>User ID</th>
         <th>First Name</th>
-        <th>Middle Name</th>
         <th>Last Name</th>
         <th>Phone Number</th>
         <th>Email</th>
         <th>Address</th>
+        <th>State</th>
         <th>Occupation</th>
+        <th></th>
         <th></th>
         <th></th>
         
@@ -309,36 +323,47 @@
       <?php 
         $i=0;
         foreach ($user_selection_result as $v) {
-          $class_tag=$i%2==0?" class='grey-table-row'":"";
-          echo "<tr".$class_tag.">";
-          echo "<th>".$v['user_id']."</th>";
-          echo "<th id=firstName_".$v['user_id'].">".$v['first_name']."</th>";
-          echo "<th>".$v['middle_name']."</th>";
-          echo "<th id=lastName_".$v['user_id'].">".$v['last_name']."</th>";
-          echo "<th>".$v['phone_number']."</th>";
-          echo "<th>".$v['email']."</th>";
-          echo "<th>".$v['address']."</th>";
-          echo "<th>".$v['state']."</th>";
+          $class_tag=$i%2==0?" class='grey-table-row'":""; ?>
+           <tr <?php echo $class_tag; ?>>
+          <th><?php echo $v['user_id']?></th>
+           <th id="firstName_<?php  $v['user_id']?>"><?php echo $v['first_name']?></th>
+           <th id="lastName_<?php echo $v['user_id']; ?>"><?php echo $v['last_name'];?></th>
+           <th><?php echo($v['phone_number']);?></th>
+           <th><?php echo($v['email']);?></th>
+           <th><?php echo($v['address']);?></th>
+           <th><?php echo($v['state']);?></th>
+           <th><?php echo($v['occupation_type']);?></th>
 
 
-          echo "<th><button type='button' 
+          <th><button type='button' 
           class='btn btn-success button-size-small'
-          id='user_".$v['user_id']."' 
-          onclick='changeUserDetail(".$v['user_id'].")'
-          >Change Detail</button></th>";
+          id='user_<?php echo $v['user_id'];?>' 
+          onclick='changeUserDetail(<?php echo $v["user_id"]; ?>)'
+          >Change Detail</button></th>
           
 
-          echo "<th><button type='button' 
+          <th><button type='button' 
           class='btn btn-success'
-          id='user_".$v['user_id']."' 
-          onclick='deleteUserDetail(".$v['user_id'].")'
-          >Delete</button></th>";
+          id='user_<?php echo $v['user_id'];?>' 
+          onclick='deleteUserDetail(<?php echo $v["user_id"];?>)'
+          >Delete</button></th>
+        
+          <th>
+
+          <button type='button'
+          class='btn btn-success'
+          id='user_.<?php echo $v["user_id"];?>'
+          onclick='showUserTimeTable(<?php echo $v["user_id"];?>)'
+          >Time Sheet
+          </button>
+              
+          </th>
+          </tr>
+
+          
+       <?php $i++; } ?>
 
 
-          echo "</tr>";
-          $i++;
-        }
-      ?>
       </tbody> 
     </table>   
 
@@ -356,7 +381,7 @@
   
   <?php if($is_delete_complete){ ?>
     <script type='text/javascript'>    
-      window.history.replaceState(NULL, 'Occupation Manager', '/admin/admin_time_sheet_view.php');
+      window.history.replaceState(NULL, 'Occupation Manager', '/admin/admin_user_management.php');
     </script>";
   <?php } ?>
 
@@ -371,7 +396,7 @@
 
 <!-- Change GET method to POSt method to stop the leak of private info -->
   <form id ="adminForm" method="POST"  
-  action="/admin/admin_time_sheet_view.php" 
+  action="/admin/admin_user_management.php" 
   class="d-flex row justify-content-center"
   enctype="multipart/form-data" accept-charset="UTF-8">
 
@@ -394,6 +419,11 @@
     id="user_id"
     name="user_id"
     value="<?php echo $_REQUEST['user_id'];?>">
+
+    <input type="hidden" 
+    id="employee_type_id"
+    name="employee_type_id"
+    value="<?php echo $select_user_result['employee_type_id'];?>">
 
     <div class="form-group  col-sm-10">
       <label for="firstName">First Name</label>
@@ -446,7 +476,7 @@
       value="<?php echo($select_user_result['phone_number']);?>"
       data-default-value="<?php echo($select_user_result['phone_number']);?>">
     </div>
-
+    
     <div class="form-group  col-sm-10">
       <label for="email">Email</label>
       <input type="text" id="email" name="email" 
@@ -462,7 +492,6 @@
       <hr/>
     </div>
     <br><br><br>
-
     <div class="d-flex justify-content-center">
       <button type="submit" 
       class="btn btn-success" 
@@ -473,7 +502,7 @@
       </button>  
       &nbsp;&nbsp;&nbsp;
       <button type="button" class="btn btn-success" 
-      onclick="window.location='/admin/admin_time_sheet_view.php'">Return to occupation view</button>
+      onclick="window.location='/admin/admin_user_management.php'">Return to occupation view</button>
     
 
       <span id="errorMessage" class='<?php
@@ -500,13 +529,37 @@
           removeUserInput();
           // Change browser's URI display.
 
-          window.history.replaceState(NULL, 'Occupation Manager', '/admin/admin_time_sheet_view.php');
+          window.history.replaceState(NULL, 'Occupation Manager', '/admin/admin_user_management.php');
           </script>";
         }
 
       ?>
       </span>
     </div>
+
+    <!-- List of all occupations and select to decide which occupation can be selected. -->
+    <span class="dropdown">
+      <button id="occupationSelectDropdown" type=button class="btn btn-secondary dropdown-toggle" type="button"  data-toggle="dropdown" aria-haspopup="true" 
+      value="<?php echo $select_user_result['employee_type_id'];?>"
+      aria-expanded="false">
+        <?php
+          echo $select_user_result['occupation_type'];
+        ?>
+      </button>
+      <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+        <?php foreach($select_all_occupations_result as $o) { ?>
+          <li class="dropdown-item" 
+          onclick="$('#occupationSelectDropdown').text(
+            '<?php echo $o['occupation_type'];?>'
+            )
+            $('#employee_type_id').val(
+
+              <?php echo $o['employee_type_id'];?>
+            );" 
+          ><?php echo $o['occupation_type']; ?></li>
+        <?php } ?>
+      </ul>
+    </span>
   </form>
 
 </body>

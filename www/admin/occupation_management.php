@@ -411,7 +411,7 @@
     $('#insert_occupation').val('t');
     $('#n').val('');$('#t').val('');
     submitValues('#t','#i','#n','#insert_occupation','#alter_occupation','#delete_occupation');">Add occupation</button>
-  <button type="button" class="btn btn-primary" onclick="window.location='/admin/admin_time_sheet_view.php'">Return to user management</button>
+  <button type="button" class="btn btn-primary" onclick="window.location='/admin/admin_user_management.php'">Return to user management</button>
   
   <nav aria-label="Page navigation example">
     <ul class="pagination">
