@@ -55,8 +55,12 @@
   // If a user remains inactive for a certain time, then
   // a user will automatically be logged out.
   try {
+    
+    $conn= new PDO("mysql:host=$host;dbname=$db;charset=utf8mb4", 
+    $_SESSION['admin_user_name'], $_SESSION['admin_pass']);
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    if(empty($_REQUEST['changeUserTimeSheetDetail'])) {
+    if(empty($_REQUEST['chageUserTimeTable'])) {
         // Only a number for 't' and 'n' inputs is allowed.
       if(
         (!is_null($_REQUEST['t']) && !is_numeric($_REQUEST['t'])) ||
@@ -66,9 +70,7 @@
         exit(1);
       }
 
-      $conn= new PDO("mysql:host=$host;dbname=$db;charset=utf8mb4", 
-      $_SESSION['admin_user_name'], $_SESSION['admin_pass']);
-      $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
 
       // ********************************
       // Select all user records
@@ -176,7 +178,7 @@
         }
 
         $select_user_attendance_record=
-        $conn->prepare("SELECT * FROM (SELECT @row_num := @row_num + 1 AS sheet_no, i.* FROM (SELECT `time`,`state`,`occupation_type` FROM `time_sheet` JOIN 
+        $conn->prepare("SELECT * FROM (SELECT @row_num := @row_num + 1 AS sheet_no, i.* FROM (SELECT `time_id`,`time`,`state`,`occupation_type` FROM `time_sheet` JOIN 
 
         `occupation` USING (`employee_type_id`) WHERE `user_id` = :_user_id) i, (SELECT @row_num := 0) t) AS total 
         LIMIT :_total OFFSET :_n_total;");
@@ -193,7 +195,52 @@
         $select_result=$select_user_attendance_record->fetchAll();
     }
 
-    if(!empty($_REQUEST['changeUserTimeSheetDetail'])){
+    if(!empty($_REQUEST['chageUserTimeTable'])){
+    
+      if(preg_match('/^[1-9][0-9]*$/',$_REQUEST['user_id']) && preg_match('/^[1-9][0-9]*$/',$_REQUEST['time_id'] ))
+      {
+
+
+        if(!empty($_REQUEST['i'])){
+          
+          $is_valid_input=false;
+          $input_time=trim($_REQUEST['time']);
+          // Check if a time format is valid.
+          if(preg_match('/^[1-9][0-9]{3}-[0-1][0-9]-[0-3][0-9]\s[0-2][0-9]:[0-5][0-9]:[0-5][0-9]$/',$input_time) &&
+             preg_match('/^[1-9][0-9]*$/',$_REQUEST['time_id']) && preg_match('/^[1-9][0-9]*$/',$_REQUEST['user_id'])&& preg_match('/^(left_work|working)$/',$_REQUEST['state']))
+          {
+       
+          }
+        }
+
+        // After the update, a time sheet is displayed.
+        $display_user_time_sheet_input_prepare=
+        $conn->prepare("SELECT * FROM (SELECT @row_num := @row_num + 1 AS sheet_no, i.* FROM (SELECT `time_id`,`time`,`state`,`occupation_type` FROM `time_sheet` JOIN `occupation` USING (`employee_type_id`) WHERE `user_id` = :user_id AND `time_id`= :time_id) AS i, (SELECT @row_num := 0) AS t) AS total;");
+
+        $display_user_time_sheet_input_prepare->bindValue(':user_id',htmlspecialchars($_REQUEST['user_id'], PDO::PARAM_INT));
+
+        $display_user_time_sheet_input_prepare->bindValue(':time_id',htmlspecialchars($_REQUEST['time_id'], PDO::PARAM_INT));
+
+        if($display_user_time_sheet_input_prepare->execute() < 1)
+        {
+          echo 'Unknown error';
+          exit(1);
+        }
+
+        $display_user_time_sheet_input_result=$display_user_time_sheet_input_prepare->fetch();
+
+        // Select all the type of employment to allow users to select in the dropdown menu.
+        $select_all_employment_type_prepare=$conn->prepare("SELECT * FROM occupation WHERE NOT employee_type_id = 1;");
+
+        if($select_all_employment_type_prepare->execute() < 1){
+          echo 'Unknown error';
+          exit(1);
+        }
+
+        $select_all_employment_type_result=$select_all_employment_type_prepare->fetchAll();
+       
+      }
+
 
     }
     
@@ -267,9 +314,16 @@
           
           <th>
             <button type="button" class="btn btn-success"
-            onclick="changeUserTimeSheetDetail(<?php echo $v['user_id'];?>);"
+            onclick="chageUserTimeDetail(<?php echo $_REQUEST['user_id'].','.$v['time_id'];?>);"
             >Change detail
             </button>
+            &nbsp;&nbsp;&nbsp;
+            
+            <button type="button" class="btn btn-success"
+            onclick="deleteUserTimeDetail(<?php echo $_REQUEST['user_id'].','.$v['time_id'];?>)">
+            Delete
+            </button>
+
           </th>
           </tr>
           
@@ -277,7 +331,7 @@
     </tbody>
   </table>
 
-  <form action="/admin/admin_time_sheet_management.php" id="userForm" method="POST">
+  <form action="/admin/admin_time_sheet_management.php" id="adminForm" method="POST">
     <button type="submit" name="i" value="logout">Admin logout</button>
 
     <button type="submit" 
@@ -294,6 +348,11 @@
     
     <input class="span2" id="user_id" name="user_id" type="hidden"
     value='<?php echo $_REQUEST['user_id'];?>'>
+    
+    <input class="span2" id="chageUserTimeTable" name="chageUserTimeTable" type="hidden" value='<?php echo $_REQUEST['chageUserTimeTable'];?>'>
+    
+    <input class="span2" id="time_id" name="time_id" type="hidden" type="hidden"
+    value='<?php echo $_REQUEST['time_id']?>'>
 
     <!-- Pull down menu -->
     <div class="dropdown">
@@ -303,16 +362,16 @@
         ?>
       </button>
       <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-        <li class="dropdown-item"  onclick="$('#t').val(10);$('#userForm').submit();" value='10'>10</a>
-        <li class="dropdown-item"  onclick="$('#t').val(25);$('#userForm').submit();"value='25'>25</a>
-        <li class="dropdown-item"  onclick="$('#t').val(50);$('#userForm').submit();"value='50'>50</a>
-        <li class="dropdown-item"  onclick="$('#t').val(100);$('#userForm').submit();"value='100'>100</a>
+        <li class="dropdown-item"  onclick="$('#t').val(10);$('#adminForm').submit();" value='10'>10</a>
+        <li class="dropdown-item"  onclick="$('#t').val(25);$('#adminForm').submit();"value='25'>25</a>
+        <li class="dropdown-item"  onclick="$('#t').val(50);$('#adminForm').submit();"value='50'>50</a>
+        <li class="dropdown-item"  onclick="$('#t').val(100);$('#adminForm').submit();"value='100'>100</a>
       </ul>
     </div>
 
     <nav aria-label="Page navigation example">
       <ul class="pagination">
-      <?php generate_previous_next_button($select_min,$select_max,$num_selection_output_tmp);?>
+      <?php generate_previous_next_button($select_min,$select_max,$num_selection_output_tmp,'#adminForm');?>
       </ul>
     </nav>
   </form>
@@ -321,65 +380,92 @@
 
 <?php } ?>
 
-<?php if(!empty($_REQUEST['changeUserTimeSheetDetail'])) { ?>
+<?php if(!empty($_REQUEST['chageUserTimeTable'])) { ?>
   
 <!-- ------------------------------------------- -->
 <!-- Adjust user's time sheet -------------------- -->
 <!-- ------------------------------------------- -->
 <div class="container align-items-center">
-  <form id ="userInputMain" method="POST"  
-  action="/employee_registration/employee_account_registration_summary.php" 
+  <form id ="adminForm" method="POST"  
+  action="/admin/admin_time_sheet_management.php" 
   class="d-flex row justify-content-center"
   enctype="multipart/form-data" accept-charset="UTF-8">
-    <div class="form-group  col-sm-10">
-      <label for="employeeFirstName">First Name</label>
-      <input type="text" id="employeeFirstName" name="employeeFirstName" class="form-control" placeholder="*Required">
-    </div>
-    <div class="form-group col-sm-10">
-      <label for="employeeMiddleName">Middle Name</label>
-      <input type="text" id="employeeMiddleName" name="employeeMiddleName" class="form-control" placeholder="">
-    </div>
-    <div class="form-group col-sm-10">
-      <label for="employeeLastName">Last Name</label>
-      <input type="text" id="employeeLastName" name="employeeLastName" class="form-control" placeholder="*Required">
-    </div>
-    <br><br><br>
-    <div class="col-sm-10">
-      <hr/>
-    </div>
-    <div class="form-group  col-sm-10">
-      <label for="employeeAddress">Address</label>
-      <input type="text" id="employeeAddress" name="employeeAddress" class="form-control" placeholder="*Required">
-    </div>
-    <div class="form-group  col-sm-10">
-      <label for="employeePhoneNumber">Phone Number</label>
-      <input type="text" id="employeePhoneNumber" name="employeePhoneNumber" class="form-control" value="fffff" placeholder="*Required">
-    </div>
-    <div class="form-group  col-sm-10">
-      <label for="employeeEmail">Email</label>
-      <input type="text" id="employeeEmail" name="employeeEmail" class="form-control" placeholder="*Required">
-    </div>
-    <br><br><br>
-    <div class="col-sm-10">
-      <hr/>
-    </div>
-    <br><br><br>
+
+    <input class="span2" id="user_id" name="user_id" type="hidden"
+    value='<?php echo $_REQUEST['user_id'];?>'>
+
+    <input class="span2" id="chageUserTimeTable" name="chageUserTimeTable" type="hidden" 
+    value='<?php echo $_REQUEST['chageUserTimeTable'];?>'>
+
+    <input class="span2" id="time_id" name="time_id" type="hidden"
+    value='<?php echo $_REQUEST['time_id'];?>'>
+
+    <input class="span2" id="state" name="state" type="hidden" 
+    value='<?php echo $display_user_time_sheet_input_result['state'];?>'>
+
+    <input class="span2" id="i" name="i" type="hidden"
+    value=''>
 
     <div class="form-group  col-sm-10">
-      <label for="employeePassword">Password</label>
-      <input type="password" id="employeePassword" name="employeePassword" class="form-control" placeholder="*Password (Only alpha-numerical characters are accepted)">
+      <span class='time-display'>Time ID: <?php echo $display_user_time_sheet_input_result['time_id'];?></span> 
+      <br><br>
+
+      <label for="time">Time</label>
+      <input type="text" id="time" name="time" class="form-control" 
+      value="<?php echo $display_user_time_sheet_input_result['time'];?>" 
+      placeholder="*Required (Current recorded time: <?php echo $display_user_time_sheet_input_result['time'] ?>)">
+
+      <hr/>
+      <!-- Pull down menu -->
+      Employee Status:&nbsp; <span class="dropdown">
+        <button id="stateSelect"class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <?php
+            echo $display_user_time_sheet_input_result['state']=='left_work' ? 'Left Work' : 'Working';
+          ?>
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+          <li class="dropdown-item"  
+          onclick="$('#state').val('left_work');$('#stateSelect').text('Left Work');">Left Work</li>
+          <li class="dropdown-item"  
+          onclick="$('#state').val('working');$('#stateSelect').text('Working');">Working</li>
+        </ul>
+      </span>
+
+      <hr/>
     </div>
+
+    
+
     <div class="form-group  col-sm-10">
-      <label for="employeePasswordRetype">Re-type Password</label>
-      <input type="password" id="employeePasswordRetype" class="form-control" placeholder="Retype Password">
+    Types of employment:&nbsp; <span class="dropdown">
+        <button id="stateSelect"class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <?php
+            echo $display_user_time_sheet_input_result['state']=='left_work' ? 'Left Work' : 'Working';
+          ?>
+        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+          <li class="dropdown-item"  
+          onclick="$('#state').val('left_work');$('#stateSelect').text('Left Work');">Left Work</li>
+          <li class="dropdown-item"  
+          onclick="$('#state').val('working');$('#stateSelect').text('Working');">Working</li>
+        </ul>
+      </span>
+    </div>    
+    
+    <div class="col-sm-10">
+      <hr/>
     </div>
+    <br><br><br>
 
     <div  class="d-flex justify-content-center">
-      <button type="button" onclick="registerUser()" class="btn btn-primary">Submit</button>
+      <button type="button" onclick="changeUserTimeDetailSubmit()" class="btn btn-success">Change Time & Detail</button>
+    </div>
+    <div  class="d-flex justify-content-center">
+      <button type="button" onclick="$('#chageUserTimeTable').val('');$('#adminForm').submit();">Return to previous screen</button>
     </div>
     <div  class="d-flex justify-content-center">
       <span id="errorMessage" class='error-message'></span>
     </div>
+
   </form>
 </div>
 

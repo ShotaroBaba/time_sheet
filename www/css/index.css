@@ -32,3 +32,8 @@ tr.grey-table-row{
 button.button-size-small{
     font-size: x-small;
 }
+
+span.time-display{
+    font-size:large;
+    font-weight: bold;
+}
