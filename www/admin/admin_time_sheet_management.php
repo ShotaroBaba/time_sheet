@@ -16,7 +16,7 @@
 
   $is_valid_input=NULL;
   $is_delete_complete=false;
-
+  $is_input_complete=false;
   // Change session ID to prevent session hijacking.
   session_regenerate_id(true);
 
@@ -200,22 +200,52 @@
       if(preg_match('/^[1-9][0-9]*$/',$_REQUEST['user_id']) && preg_match('/^[1-9][0-9]*$/',$_REQUEST['time_id'] ))
       {
 
-
+        // ************************************************
+        // Update time and its detail
+        // ************************************************
         if(!empty($_REQUEST['i'])){
           
           $is_valid_input=false;
           $input_time=trim($_REQUEST['time']);
+          
           // Check if a time format is valid.
-          if(preg_match('/^[1-9][0-9]{3}-[0-1][0-9]-[0-3][0-9]\s[0-2][0-9]:[0-5][0-9]:[0-5][0-9]$/',$input_time) &&
-             preg_match('/^[1-9][0-9]*$/',$_REQUEST['time_id']) && preg_match('/^[1-9][0-9]*$/',$_REQUEST['user_id'])&& preg_match('/^(left_work|working)$/',$_REQUEST['state']))
+          if(
+            preg_match('/^[1-9][0-9]{3}-[0-1][0-9]-[0-3][0-9]\s[0-2][0-9]:[0-5][0-9]:[0-5][0-9]$/',$input_time) &&
+             preg_match('/^[1-9][0-9]*$/', $_REQUEST['time_id']) && 
+             preg_match('/^[1-9][0-9]*$/', $_REQUEST['user_id']) &&
+             preg_match('/^[1-9][0-9]*$/', $_REQUEST['employee_type_id']) &&
+             preg_match('/^(left_work|working)$/',$_REQUEST['state']))
           {
-       
+            $is_valid_input=true;
+            $update_time_sheet_prepare=$conn->prepare('UPDATE time_sheet SET `time`=:_time,
+            `employee_type_id`=:employee_type_id,
+            `state`=:state WHERE
+            `time_id`=:time_id AND `user_id` = :user_id;');
+
+            // Bind values.////
+
+            $update_time_sheet_prepare->bindValue(':_time',$input_time,PDO::PARAM_STR);
+            $update_time_sheet_prepare->bindValue(':employee_type_id',$_REQUEST['employee_type_id'],PDO::PARAM_INT);
+            $update_time_sheet_prepare->bindValue(':state', $_REQUEST['state'],PDO::PARAM_STR);
+            $update_time_sheet_prepare->bindValue(':time_id', $_REQUEST['time_id'],PDO::PARAM_INT);
+            $update_time_sheet_prepare->bindValue(':user_id',$_REQUEST['user_id'],PDO::PARAM_INT);
+            
+            ///////////////////
+
+            if($update_time_sheet_prepare->execute()<1){
+              echo "Unknown error.";
+              exit(1);
+            }
+            $is_input_complete=true;
+          }
+          else {
+            $is_valid_input=false;
           }
         }
 
         // After the update, a time sheet is displayed.
         $display_user_time_sheet_input_prepare=
-        $conn->prepare("SELECT * FROM (SELECT @row_num := @row_num + 1 AS sheet_no, i.* FROM (SELECT `time_id`,`time`,`state`,`occupation_type` FROM `time_sheet` JOIN `occupation` USING (`employee_type_id`) WHERE `user_id` = :user_id AND `time_id`= :time_id) AS i, (SELECT @row_num := 0) AS t) AS total;");
+        $conn->prepare("SELECT * FROM (SELECT @row_num := @row_num + 1 AS sheet_no, i.* FROM (SELECT `time_id`,`time`,`state`,`occupation_type`,`employee_type_id` FROM `time_sheet` JOIN `occupation` USING (`employee_type_id`) WHERE `user_id` = :user_id AND `time_id`= :time_id) AS i, (SELECT @row_num := 0) AS t) AS total;");
 
         $display_user_time_sheet_input_prepare->bindValue(':user_id',htmlspecialchars($_REQUEST['user_id'], PDO::PARAM_INT));
 
@@ -229,6 +259,11 @@
 
         $display_user_time_sheet_input_result=$display_user_time_sheet_input_prepare->fetch();
 
+        
+        // *******************************
+        // *******************************
+        
+
         // Select all the type of employment to allow users to select in the dropdown menu.
         $select_all_employment_type_prepare=$conn->prepare("SELECT * FROM occupation WHERE NOT employee_type_id = 1;");
 
@@ -241,7 +276,6 @@
        
       }
 
-
     }
     
     // Finally reset cookie lifetime.
@@ -252,6 +286,7 @@
   }
 
   catch(PDOException $e)  {
+    echo $e;
     echo "Unknown error.";
     exit(1); 
   }
@@ -340,6 +375,10 @@
     
     >Insert new record</button>
     
+      <button type="button" onclick='window.location="/admin/admin_user_management.php";'>
+        Return to admin user management page</button>
+      </button>
+
     <input class="span2" id="t" name="t" type="hidden" 
     value='<?php echo $select_num_output; ?>'>
     
@@ -403,6 +442,9 @@
     <input class="span2" id="state" name="state" type="hidden" 
     value='<?php echo $display_user_time_sheet_input_result['state'];?>'>
 
+    <input class="span2" id="employee_type_id" name="employee_type_id" type="hidden"
+    value="<?php echo $display_user_time_sheet_input_result['employee_type_id'];?>">
+
     <input class="span2" id="i" name="i" type="hidden"
     value=''>
 
@@ -437,17 +479,25 @@
     
 
     <div class="form-group  col-sm-10">
-    Types of employment:&nbsp; <span class="dropdown">
-        <button id="stateSelect"class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    Types of employment:&nbsp; 
+      <span class="dropdown">
+        <button id="stateSelectEmploymentType" class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           <?php
-            echo $display_user_time_sheet_input_result['state']=='left_work' ? 'Left Work' : 'Working';
+            echo $display_user_time_sheet_input_result['occupation_type'];
           ?>
-        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-          <li class="dropdown-item"  
-          onclick="$('#state').val('left_work');$('#stateSelect').text('Left Work');">Left Work</li>
-          <li class="dropdown-item"  
-          onclick="$('#state').val('working');$('#stateSelect').text('Working');">Working</li>
-        </ul>
+        </button>
+          <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+            <?php foreach($select_all_employment_type_result as $v) { ?>
+            
+            <li class="dropdown-item"  
+            onclick="$('#employee_type_id').val(<?php echo $v['employee_type_id'];?>);
+            $('#stateSelectEmploymentType').text('<?php echo $v['occupation_type'];?>');">
+            <?php echo $v['occupation_type'];?>
+            </li>
+
+            <?php } ?>
+
+          </ul>
       </span>
     </div>    
     
@@ -462,9 +512,34 @@
     <div  class="d-flex justify-content-center">
       <button type="button" onclick="$('#chageUserTimeTable').val('');$('#adminForm').submit();">Return to previous screen</button>
     </div>
+    
+    
     <div  class="d-flex justify-content-center">
       <span id="errorMessage" class='error-message'></span>
     </div>
+    
+    
+    <span class="<?php echo $is_input_complete ? 'complete-message': 'error-message';?>">
+    <?php if(!$is_valid_input && !is_null($is_valid_input)){ 
+      echo "Invalid occupation information input.";
+    }
+    else if($is_empty_input && !is_null($is_empty_input)){
+      echo "Either form is empty input.";
+    }
+    else if($is_input_duplicate && !is_null($is_input_duplicate)){
+      echo "The input occupation name already exists.";
+    }
+    else if($is_input_complete) {
+      echo "Occupation info has successfully been input.";
+      echo "<script type='text/javascript'>
+      
+      window.history.replaceState(NULL, 'Occupation Manager', '/admin/occupation_management.php?insert_occupation=t');
+      </script>";
+    }
+    ?>
+    </span>
+     
+    
 
   </form>
 </div>

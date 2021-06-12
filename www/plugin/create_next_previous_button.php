@@ -25,7 +25,7 @@ function generate_previous_next_button($min,$max,$current_pos,$form_id='#userFor
         
         // If min & max is the same, then only a number is printed.
         if($min==$max){
-            echo _generate_li_tag($min);
+            echo _generate_li_tag($min,NULL,$form_id);
         }
         
         else if($min < $max){
