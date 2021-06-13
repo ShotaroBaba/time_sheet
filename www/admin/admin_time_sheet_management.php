@@ -60,11 +60,12 @@
     $_SESSION['admin_user_name'], $_SESSION['admin_pass']);
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    if(empty($_REQUEST['chageUserTimeTable'])) {
+    if(empty($_REQUEST['chageUserTimeTable']) &&
+    preg_match('/^[1-9][0-9]*$/', $_REQUEST['user_id'])) {
         // Only a number for 't' and 'n' inputs is allowed.
       if(
-        (!is_null($_REQUEST['t']) && !is_numeric($_REQUEST['t'])) ||
-        (!is_null($_REQUEST['n']) && !is_numeric($_REQUEST['n']))
+        (!empty($_REQUEST['t']) && !is_numeric($_REQUEST['t'])) ||
+        (!empty($_REQUEST['n']) && !is_numeric($_REQUEST['n']))
       ){
         echo "Unknown error.";
         exit(1);
@@ -163,7 +164,7 @@
         $select_num_output=$_REQUEST['t'] == '' || is_null($_REQUEST['t']) ? 10 : htmlspecialchars($_REQUEST['t']);
         $num_selection_output=$_REQUEST['n']== '' || is_null($_REQUEST['n']) ? 1 : htmlspecialchars($_REQUEST['n']);
 
-        // Set the limit of selection.
+        // Set the limit of selectiissue_dateon.
         $select_min=1;
         $select_max=intdiv($total_result['total_attend_num'],$select_num_output);
         if($total_result['total_attend_num']/($select_num_output*$select_max) > 1 || $select_max ==0){
@@ -231,7 +232,6 @@
             $update_time_sheet_prepare->bindValue(':user_id',$_REQUEST['user_id'],PDO::PARAM_INT);
             
             ///////////////////
-
             if($update_time_sheet_prepare->execute()<1){
               echo "Unknown error.";
               exit(1);
@@ -242,8 +242,10 @@
             $is_valid_input=false;
           }
         }
-
+        
+        // ************************************************
         // After the update, a time sheet is displayed.
+        // ************************************************
         $display_user_time_sheet_input_prepare=
         $conn->prepare("SELECT * FROM (SELECT @row_num := @row_num + 1 AS sheet_no, i.* FROM (SELECT `time_id`,`time`,`state`,`occupation_type`,`employee_type_id` FROM `time_sheet` JOIN `occupation` USING (`employee_type_id`) WHERE `user_id` = :user_id AND `time_id`= :time_id) AS i, (SELECT @row_num := 0) AS t) AS total;");
 
@@ -375,9 +377,13 @@
     
     >Insert new record</button>
     
-      <button type="button" onclick='window.location="/admin/admin_user_management.php";'>
-        Return to admin user management page</button>
-      </button>
+    <button type="button" onclick='window.location="/admin/admin_user_management.php";'>
+      Return to admin user management page</button>
+    </button>
+  
+    <button type="button" onclick='changeToSalaryPage(<?php echo $_REQUEST["user_id"]; ?>)'>
+      Calculate salary
+    </button>
 
     <input class="span2" id="t" name="t" type="hidden" 
     value='<?php echo $select_num_output; ?>'>
@@ -478,7 +484,7 @@
 
     
 
-    <div class="form-group  col-sm-10">
+    <div class="form-group col-sm-10">
     Types of employment:&nbsp; 
       <span class="dropdown">
         <button id="stateSelectEmploymentType" class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

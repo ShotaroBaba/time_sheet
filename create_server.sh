@@ -122,7 +122,6 @@ sudo docker exec mysql_server \
 bash -c "mysql -uroot -hmysql_server -p"$(sudo decrypt_script/root_decrypt.sh)" \
  -e \"REVOKE ALL PRIVILEGES ON *.* FROM 'admin'@'%'; GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, RELOAD, PROCESS, FILE, REFERENCES, INDEX, ALTER, SHOW DATABASES, CREATE TEMPORARY TABLES, LOCK TABLES, CREATE VIEW, EVENT, TRIGGER, SHOW VIEW, CREATE ROUTINE, ALTER ROUTINE, CREATE USER, EXECUTE ON *.* TO 'admin'@'%' REQUIRE NONE WITH GRANT OPTION MAX_QUERIES_PER_HOUR 0 MAX_CONNECTIONS_PER_HOUR 0 MAX_UPDATES_PER_HOUR 0 MAX_USER_CONNECTIONS 0;\""
 
-
 # TODO: Not to generate a password directly.
 # Create a client that can see a manager. 
 sudo docker exec mysql_server \
@@ -138,3 +137,6 @@ bash -c "mysql -uroot -hmysql_server -p"$(sudo decrypt_script/root_decrypt.sh)" 
 cat www/.secret/.config_sample.php | \
 sed "s|_____time_sheet_pass_____|"$(sudo openssl rsautl -decrypt -inkey $priv_key -in $encrypted_table_client_pass)"|g" | \
 sed "s|_____pepper_string_____|"$pepper"|" > www/.secret/.config.php
+
+sudo docker exec mysql_server \
+bash -c "mysql -uroot hmysql_server -p"$(sudo decrypt_script/root_decrypt.sh)" < /create_database.sql" 
