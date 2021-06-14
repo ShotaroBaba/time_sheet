@@ -66,7 +66,7 @@ CREATE TABLE IF NOT EXISTS `user_secret` (
 ALTER TABLE `user_secret` ADD FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`);
 ALTER TABLE `user_log` ADD FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`);
 ALTER TABLE `time_sheet` ADD FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`);
-ALTER TABLE `time_sheet` ADD FOREIGN KEY (`employee_type_id`) REFERENCES `occupation` (`employee_type_id`)
+ALTER TABLE `time_sheet` ADD FOREIGN KEY (`employee_type_id`) REFERENCES `occupation` (`employee_type_id`);
 ALTER TABLE `user` ADD FOREIGN KEY (`employee_type_id`) REFERENCES `occupation` (`employee_type_id`);
 
 -- Change users' database permissions
