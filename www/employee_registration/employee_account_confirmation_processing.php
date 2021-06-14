@@ -6,6 +6,7 @@
 header("Content-Type: text/html;charset=UTF-8");
 error_reporting(E_ALL ^ E_WARNING ^ E_NOTICE);
 
+
 include "/var/www/html/.secret/.config.php";
 
 require_once("/var/www/html/plugin/strip_malicious_character.php");
@@ -44,6 +45,7 @@ if(
     die;
   }
 
+  $is_registration_success=false;
 try {
 
   $conn = new PDO("mysql:host=$host;dbname=$db;charset=utf8mb4", $user, $pass);
@@ -150,6 +152,8 @@ try {
 
   // Email verification completed.
 
+  // Set true after all process has finished.
+  $is_registration_success=true;
 } catch(PDOException $e) {
 
   http_response_code(500);
@@ -161,5 +165,38 @@ try {
   $insert_pass_prepare=NULL;
 }
 
-
 ?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="/script/jquery-3.6.0.min.js"></script>
+  <title>Now processing...</title>
+</head>
+<body>
+  
+  <form method="POST"
+  id='userForm'
+  action='/employee_registration/employee_pre_registration_complete_message.php'
+  enctype="multipart/form-data" accept-charset="UTF-8"
+  >
+
+  <input id='registrationSuccess'
+  name='registrationSuccess'
+  type='hidden'
+  value='<?php echo $is_registration_success;?>'>
+
+ 
+  </form>
+   <!-- If registration success, then go to regisration complete web page. -->
+   <?php if($is_registration_success) { ?>
+    <script type="text/javascript">
+      $('#userForm').submit();
+    </script>
+  <?php } ?>
+
+</body>
+</html>

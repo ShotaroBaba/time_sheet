@@ -66,6 +66,7 @@ $_SESSION["user_info"]=$_POST;
 
 <link href='/css/bootstrap.min.css?v=1' rel='stylesheet'>
 <link href='/css/index.css?v=<?php echo time(); ?>' rel='stylesheet'>
+<title>Registraion Confirmation</title>
 
 <div class="container align-items-center" id="formReview">
   <h1 style="text-align: center">Account Registration Review</h1>
