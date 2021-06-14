@@ -13,6 +13,10 @@ case $yn in
         exit 1;;
 esac
 
+# The default docker value configuration file will be copied to
+# .env
+sudo cp .env_default .env
+
 sudo docker-compose down && sudo docker image prune -a 2> /dev/null && \
 sudo docker rm $(sudo docker ps -a -f status=exited -q) 2> /dev/null
 
@@ -34,8 +38,6 @@ if [ ! -d $pass_dir ]; then
     sudo echo $pass_dir
 fi
 
-sudo cp default_root.txt .mysql_secrets
-sudo cp default_admin.txt .mysql_secrets
 
 pub_key=$key_dir/pub_$rsa_key_root_name.pem
 priv_key=$key_dir/priv_$rsa_key_root_name.pem
@@ -48,9 +50,13 @@ encrypted_table_admin_pass=$pass_dir/table_admin_$rsa_key_root_name.txt.enc
 sudo openssl genrsa -out $priv_key
 sudo openssl rsa -in $priv_key -pubout -out $pub_key
 
+sudo cp default_root.txt .mysql_secrets
+sudo cp default_admin.txt .mysql_secrets
+
 # TODO: Find out a way to check the status of mysql.
 echo "Wait until your mysql server fully starts..."
 sleep 45
+
 
 # Generate root password & store it.
 sudo openssl rand -base64 32 | sudo openssl rsautl -encrypt -pubin -inkey $pub_key -out $encrypted_pass

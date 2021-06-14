@@ -42,7 +42,7 @@ services:
       # NOTE: IMMEDIATELY CHANGE THIS PASSWORD AFTER CREATING YOUR INSTANCE! # It is done by ALTER USER 'root'@'%' IDENTIFIED BY
       # mysql_native_password BY '[your-password]'
       MYSQL_ONETIME_PASSWORD: 'yes'
-      MYSQL_ROOT_PASSWORD: 'yesterday'
+      MYSQL_ROOT_PASSWORD: 'password_1'
       # NOTE: CHANGE THIS PASSWORD AFTER CREATING YOUR INSTANCE! # It is done by issuing ALTER USER admin@'%' IDENTIFIED BY
       # mysql_native_password BY '[your-password]'
       MYSQL_USER: "${MYSQL_ADMIN_USER}"
