@@ -397,22 +397,29 @@
 
     <!-- Hidden inputs end. -->
 
-    <button type="button" onclick="
+    <button type="button" 
+    class="btn btn-warning"
+    onclick="
     $('#i').val('logout');
     $('#adminForm').submit();
     ">Admin logout</button>
 
     <button type="submit" 
+    class="btn btn-warning"
     name="i" num_selection_output
     value=<?php echo($user_info['state']=='left_work' ? '"working"' : '"left_work"'); ?>
     
     >Insert a new record</button>
     
-    <button type="button" onclick='window.location="/admin/admin_user_management.php";'>
+    <button type="button" 
+    class="btn btn-warning"
+    onclick='window.location="/admin/admin_user_management.php";'>
       Return to admin user management page</button>
     </button>
   
-    <button type="button" onclick='changeToSalaryPage(<?php echo $_REQUEST["user_id"]; ?>)'>
+    <button type="button" 
+    class="btn btn-warning"
+    onclick='changeToSalaryPage(<?php echo $_REQUEST["user_id"]; ?>)'>
       Calculate salary
     </button>
 

@@ -220,7 +220,9 @@
     </table>
     
     <div>
-      <button type="button" onclick='changeToTimeSheetPage(<?php echo $_REQUEST["user_id"];?>)'>
+      <button type="button" 
+      class="btn btn-warning"
+      onclick='changeToTimeSheetPage(<?php echo $_REQUEST["user_id"];?>)'>
         Return to time sheet
       </button>
     </div>
