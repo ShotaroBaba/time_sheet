@@ -16,6 +16,14 @@
   session_regenerate_id(true);
 
   try {
+
+    if($_REQUEST['i']=='logout'){
+      session_unset();
+      session_destroy();
+      header('Location: /');
+      exit(0);
+    }
+
     if(empty($_SESSION)){
         session_unset();
         session_destroy();
@@ -303,6 +311,10 @@
     name=user_id
     value=''>
 
+    <input type="hidden"
+    id="i"
+    name="i"
+    value=''>    
 
     <table class="table">
       <thead>
@@ -370,7 +382,16 @@
     <button type="button" class="btn btn-success" onclick="window.location='/admin/occupation_management.php'">
       Change to occupation manager
     </button>
+
+    &nbsp;&nbsp;
     
+    <button type="button" 
+    class="btn btn-success" 
+    onclick="$('#i').val('logout');
+    $('#adminForm').submit();">
+      Admin Logout
+    </button>
+
     <?php if($is_delete_complete){ ?>
     <span id="errorMessage" class='complete-message'> 
       User input deletion completed.

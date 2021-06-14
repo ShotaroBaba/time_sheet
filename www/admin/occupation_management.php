@@ -34,6 +34,14 @@
   }
 
   try {
+
+    if($_REQUEST['i']=='logout'){
+      session_unset();
+      session_destroy();
+      header('Location: /');
+      exit(0);
+    }
+
     if(isset($_SESSION['expireAfter']) & time() > $_SESSION['expireAfter']){
       session_unset();
       session_destroy();
@@ -320,6 +328,10 @@
     name="n" 
     id="n" 
     value="<?php echo $num_selection_output;?>">
+    
+    <input type="hidden"
+    name="i"
+    id="i" value=""> 
 
     <input type="hidden" 
     id="insert_occupation" 
@@ -411,8 +423,16 @@
     $('#insert_occupation').val('t');
     $('#n').val('');$('#t').val('');
     submitValues('#t','#i','#n','#insert_occupation','#alter_occupation','#delete_occupation');">Add occupation</button>
+  
   <button type="button" class="btn btn-primary" onclick="window.location='/admin/admin_user_management.php'">Return to user management</button>
   
+  <button type="button" 
+    class="btn btn-primary" 
+    onclick="$('#i').val('logout');
+    $('#adminForm').submit();">
+      Admin Logout
+  </button>
+
   <nav aria-label="Page navigation example">
     <ul class="pagination">
     <?php 

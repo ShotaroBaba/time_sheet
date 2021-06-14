@@ -20,7 +20,14 @@
   // Change session ID to prevent session hijacking.
   session_regenerate_id(true);
 
-  
+
+  if($_REQUEST['i']=='logout'){
+    session_unset();
+    session_destroy();
+    header('Location: /');
+    exit(0);
+  }
+
   if(empty($_SESSION)){
     session_unset();
     session_destroy();
@@ -369,13 +376,37 @@
   </table>
 
   <form action="/admin/admin_time_sheet_management.php" id="adminForm" method="POST">
-    <button type="submit" name="i" value="logout">Admin logout</button>
+    
+    <!-- Hidden inputs -->
+    <input class="span2" id="t" name="t" type="hidden" 
+    value='<?php echo $select_num_output; ?>'>
+    
+    <input class="span2" id="n" name="n" type="hidden"
+    value='<?php echo $num_selection_output?>'>
+    
+    <input class="span2" id="i" name="i" type="hidden"
+    value=''>
+
+    <input class="span2" id="user_id" name="user_id" type="hidden"
+    value='<?php echo $_REQUEST['user_id'];?>'>
+    
+    <input class="span2" id="chageUserTimeTable" name="chageUserTimeTable" type="hidden" value='<?php echo $_REQUEST['chageUserTimeTable'];?>'>
+    
+    <input class="span2" id="time_id" name="time_id" type="hidden" type="hidden"
+    value='<?php echo $_REQUEST['time_id']?>'>
+
+    <!-- Hidden inputs end. -->
+
+    <button type="button" onclick="
+    $('#i').val('logout');
+    $('#adminForm').submit();
+    ">Admin logout</button>
 
     <button type="submit" 
     name="i" num_selection_output
     value=<?php echo($user_info['state']=='left_work' ? '"working"' : '"left_work"'); ?>
     
-    >Insert new record</button>
+    >Insert a new record</button>
     
     <button type="button" onclick='window.location="/admin/admin_user_management.php";'>
       Return to admin user management page</button>
@@ -385,19 +416,7 @@
       Calculate salary
     </button>
 
-    <input class="span2" id="t" name="t" type="hidden" 
-    value='<?php echo $select_num_output; ?>'>
-    
-    <input class="span2" id="n" name="n" type="hidden"
-    value='<?php echo $num_selection_output?>'>
-    
-    <input class="span2" id="user_id" name="user_id" type="hidden"
-    value='<?php echo $_REQUEST['user_id'];?>'>
-    
-    <input class="span2" id="chageUserTimeTable" name="chageUserTimeTable" type="hidden" value='<?php echo $_REQUEST['chageUserTimeTable'];?>'>
-    
-    <input class="span2" id="time_id" name="time_id" type="hidden" type="hidden"
-    value='<?php echo $_REQUEST['time_id']?>'>
+
 
     <!-- Pull down menu -->
     <div class="dropdown">
