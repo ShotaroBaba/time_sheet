@@ -288,7 +288,7 @@
   }
 
   catch(PDOException $e)  {
-    echo $e;
+    
     echo "Unknown error.";
     exit(1); 
   }
