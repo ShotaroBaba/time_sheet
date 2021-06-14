@@ -19,7 +19,7 @@ git clone https://github.com/ShotaroBaba/time_sheet.git
 To install servers, invoke the following command in the root of project directory:
 ```bash
 cd time_sheet
-sudo ./create_server.sh
+./create_server.sh
 ```
 
 # Root & Other Passwords Retrieval
@@ -28,29 +28,29 @@ During the installation, the passwords of root, admin and time_sheet_admin MySQL
 
 To retrive MySQL 'root' password:
 ```bash
-sudo decrypt_script/root_decrypt.sh
+decrypt_script/root_decrypt.sh
 ```
 Alternatively, you can run this command and copy the password to your clipboard (xclip needs to be installed):
 ```bash
-sudo decrypt_script/root_decrypt.sh | xclip -sel clip
+decrypt_script/root_decrypt.sh | xclip -sel clip
 ```
 #
 To retrieve MySQL 'admin' password:
 ```bash
-sudo decrypt_script/root_decrypt.sh
+decrypt_script/root_decrypt.sh
 ```
 Alterantive option
 ```bash
-sudo decrypt_script/root_decrypt.sh | xclip -sel clip
+decrypt_script/root_decrypt.sh | xclip -sel clip
 ```
 #
 To retrieve MySQL 'timesheet_admin' password:
 ```bash
-sudo decrypt_script/timesheet_admin_decrypt.sh
+decrypt_script/timesheet_admin_decrypt.sh
 ```
 Alterantive option
 ```bash
-sudo decrypt_script/timesheet_admin_decrypt.sh | xclip -sel cli
+decrypt_script/timesheet_admin_decrypt.sh | xclip -sel cli
 ```
 # Managing Server
 To shutdown server after the installation, invoke the below command:
@@ -65,12 +65,12 @@ To re-run your server:
 
 To stop your server:
 ```bash
-sudo docker-compose down
+docker-compose down
 ```
 
 To uninstall your server:
 ```bash
-sudo ./uninstall_server.sh
+./uninstall_server.sh
 ```
 Note that you cannot retrieve your server data after the uninstallation.
 

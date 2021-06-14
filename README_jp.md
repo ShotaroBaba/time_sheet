@@ -21,7 +21,7 @@ git clone https://github.com/ShotaroBaba/time_sheet.git
 インストールするためには下記のコマンドをプロジェクトディレクトリのトップで実行して下さい：
 ```bash
 cd time_sheet
-sudo ./create_server.sh
+./create_server.sh
 ```
 
 # Root、その他バスワードへのアクセス
@@ -30,30 +30,30 @@ sudo ./create_server.sh
 
 To retrive MySQL 'root' password:
 ```bash
-sudo decrypt_script/root_decrypt.sh
+decrypt_script/root_decrypt.sh
 ```
 別の方法として,クリップボードにパスワードをコピーすることも可能です:
 ```bash
-sudo decrypt_script/root_decrypt.sh | xclip -sel clip
+decrypt_script/root_decrypt.sh | xclip -sel clip
 ```
 #
 MySQLの'admin'パスワードを取り出す:
 ```bash
-sudo decrypt_script/root_decrypt.sh
+decrypt_script/root_decrypt.sh
 ```
 別のやり方
 )
 ```bash
-sudo decrypt_script/root_decrypt.sh | xclip -sel clip
+decrypt_script/root_decrypt.sh | xclip -sel clip
 ```
 #
 MySQLの'timesheet_admin'パスワードを取り出す:
 ```bash
-sudo decrypt_script/timesheet_admin_decrypt.sh
+decrypt_script/timesheet_admin_decrypt.sh
 ```
 別のやり方
 ```bash
-sudo decrypt_script/timesheet_admin_decrypt.sh | xclip -sel cli
+decrypt_script/timesheet_admin_decrypt.sh | xclip -sel cli
 ```
 # サーバの管理
 
@@ -69,12 +69,12 @@ sudo decrypt_script/timesheet_admin_decrypt.sh | xclip -sel cli
 
 サーバの停止
 ```bash
-sudo docker-compose down
+docker-compose down
 ```
 
 サーバのアンインストール
 ```bash
-sudo ./uninstall_server.sh
+./uninstall_server.sh
 ```
 サーバのアンインストール後はデータのバックアップ等はできないことを留意ください。
 
