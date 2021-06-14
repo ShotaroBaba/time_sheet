@@ -1,4 +1,4 @@
-# time_sheet_test
+# time_sheet
 A website for recording employee's timestamp.
 
 # Source
