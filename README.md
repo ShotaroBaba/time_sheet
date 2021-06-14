@@ -68,11 +68,11 @@ To stop your server:
 sudo docker-compose down
 ```
 
-WARNING: To uninstall your server:
+To uninstall your server:
 ```bash
 sudo ./uninstall_server.sh
 ```
-
+Note that you cannot retrieve your server data after the uninstallation.
 
 # Accessing to the server
 You can access to the webpage by inputting the following address:

@@ -10,8 +10,8 @@ case $yn in
         exit 1;;
 esac
 
-sudo docker-compose down && sudo docker image prune -a 2> /dev/null && \
-sudo docker rm $(sudo docker ps -a -f status=exited -q) 2> /dev/null
+# sudo docker-compose down && sudo docker image prune -a 2> /dev/null && \
+# sudo docker rm $(sudo docker ps -a -f status=exited -q) 2> /dev/null
 
 sudo rm -rf config data logs test_data .mysql_secrets mysql_secrets decrypt_script
 
