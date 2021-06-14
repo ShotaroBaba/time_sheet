@@ -17,8 +17,8 @@ esac
 # .env
 cp .env_default .env
 
-# docker-compose down && docker image prune -a 2> /dev/null && \
-# docker rm $(docker ps -a -f status=exited -q) 2> /dev/null
+# Remove all images from docker container.
+docker-compose rm
 
 rm -rf config data logs test_data .mysql_secrets mysql_secrets decrypt_script && docker-compose up -d
 
