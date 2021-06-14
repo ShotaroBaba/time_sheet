@@ -57,7 +57,6 @@ sudo cp default_admin.txt .mysql_secrets
 echo "Wait until your mysql server fully starts..."
 sleep 45
 
-
 # Generate root password & store it.
 sudo openssl rand -base64 32 | sudo openssl rsautl -encrypt -pubin -inkey $pub_key -out $encrypted_pass
 
@@ -145,4 +144,4 @@ sed "s|_____time_sheet_pass_____|"$(sudo openssl rsautl -decrypt -inkey $priv_ke
 sed "s|_____pepper_string_____|"$pepper"|" > www/.secret/.config.php
 
 sudo docker exec mysql_server \
-bash -c "mysql -uroot hmysql_server -p"$(sudo decrypt_script/root_decrypt.sh)" < /create_database.sql" 
+bash -c "mysql -uroot -hmysql_server -p"$(sudo decrypt_script/root_decrypt.sh)" < /create_database.sql" 

@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS `user` (
   `phone_number` VARCHAR(48) NOT NULL,
   `employee_type_id` INT DEFAULT 1 NOT NULL,
   `email` VARCHAR(128) NOT NULL,
-  `state` VARCHAR(16) DEFAULT 'left_work' NOT NULL
+  `state` VARCHAR(16) DEFAULT 'left_work' NOT NULL,
   UNIQUE (`first_name`, `middle_name`, `last_name`, `phone_number`),
   UNIQUE (`email`)
 );
