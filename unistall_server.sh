@@ -11,6 +11,7 @@ case $yn in
 esac
 
 # Remove all images from docker container.
+docker-compose down
 docker-compose rm
 
 rm -rf config data logs test_data .mysql_secrets mysql_secrets decrypt_script
