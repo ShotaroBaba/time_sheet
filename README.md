@@ -95,4 +95,4 @@ If you want to change the port numbers that are used to access to the website, j
 - Throughly check all systems and servers, including README.md
 - Create Japanese Version README.md as well as server
 # Source
-  Timesheet icon [image](https://publicdomainvectors.org/en/free-clipart/Paper-sheet/59351.html) (https://publicdomainvectors.org/en/free-clipart/Paper-sheet/59351.html)
+  Timesheet favicon.ico [image](https://publicdomainvectors.org/en/free-clipart/Paper-sheet/59351.html) (https://publicdomainvectors.org/en/free-clipart/Paper-sheet/59351.html)
