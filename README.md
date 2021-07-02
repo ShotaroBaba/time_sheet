@@ -74,7 +74,7 @@ To uninstall your server:
 ```
 Note that you cannot retrieve your server data after the uninstallation.
 
-# Accessing to the server
+# Accessing to the Server
 You can access to the webpage by inputting the following address:
 ```
 localhost:59111
@@ -93,6 +93,6 @@ If you want to change the port numbers that are used to access to the website, j
 - Create an install script that enables https access
 - Adjust the apperance of the website for usability
 - Throughly check all systems and servers, including README.md
-- Create Japanese Version README.md as well as server
+- Create Japanese Version README.md as well as web server
 # Source
   Timesheet favicon.ico [image](https://publicdomainvectors.org/en/free-clipart/Paper-sheet/59351.html) (https://publicdomainvectors.org/en/free-clipart/Paper-sheet/59351.html)
