@@ -10,3 +10,6 @@ decrypt_script
 create_database.sh
 .vscode
 .config.php
+test_main.pl
+*dummy*
+test_sql.sql
