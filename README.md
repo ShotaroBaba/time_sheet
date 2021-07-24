@@ -1,13 +1,13 @@
 # Time Sheet
-A website for recording employee's timestamp based on Docker, MySQL and PHP. User can also manage MySQL server using phpMyAdmin.
+A website for recording employee's timestamp based on Docker, MySQL and PHP. A user can also manage MySQL server using phpMyAdmin.
 
 # Prerequisite
-Your operating system needs to be a Ubuntu (>=18.04 LTS), where the developed servers have been tested, CentOS (>= 7.4), and other Unix-like OS. Currently, the developed server has not been tested under CentOS or the other Unix-like OS.
+Your operating system needs to be Ubuntu (>=18.04 LTS), where the developed servers have been tested, CentOS (>= 7.4), and other Unix-like OS. Currently, the developed server has not been tested under CentOS or the other Unix-like OS.
 
 Before proceeding to the installation, make sure that you have installed the following packages on your system:
 ```
 Docker (>=19.03.7)
-Docker-compose (>=1.24.1)
+Docker-Compose (>=1.24.1)
 ```
 # Installation
 First download repository by running this command
