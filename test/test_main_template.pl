@@ -18,27 +18,41 @@ my $password = join ('' => map $charset[rand @charset], 1 .. 30);
 # A plain password (without hash, salt and pepper) is provided for testing purpose.
 
 # Insert employee if it does not exist.
-my $sql_insert_employee="INSERT INTO `occupation` (`occupation_type`, `wage`,`issue_time`) VALUES
+my $sql_insert_employee_type="INSERT INTO occupation (occupation_type, wage,issue_time) VALUES
           ('test',3000,'".((localtime))->strftime("%Y-%m-%d %H:%M:%S")."');\n\n";
-
-my $sql_insert_employee_type="";
 
 # This password is used only for testing purpose!
 my $test_pass="_____time_admin_pass_____";
-my $employee_type_id_sql='SELECT \`employee_type_id\` FROM \`occupation\` WHERE \`occupation_type\` = \'test\'';
+my $employee_type_id_sql='SELECT \`employee_type_id\` FROM \`occupation\` WHERE \`occupation_type\` = \'test\';';
 
 # SELECT employee ID & user ID for testing.
-my $employee_id = `docker exec -i mysql_server bash -c 'cat - | mysql -utime_sheet_admin -p$test_pass -Dtime_sheet -N 2> /dev/null' << EOF 
+my $employee_type_id = `docker exec -i mysql_server bash -c 'cat - | mysql -utime_sheet_admin -p$test_pass -Dtime_sheet -N ' << EOF 
 $employee_type_id_sql
 EOF`;
 
-chomp($employee_id);
-print $employee_id;
+# system "( docker exec -i mysql_server bash -c 'cat - | mysql -utime_sheet_admin -p$test_pass -Dtime_sheet -N ') << EOF 
+# $employee_type_id_sql
+# EOF";
+
+if(!$employee_type_id){
+    
+system "( docker exec -i mysql_server bash -c 'cat - | mysql -utime_sheet_admin -p$test_pass -Dtime_sheet -N 2> /dev/null') << EOF 
+$sql_insert_employee_type
+EOF";
+
+$employee_type_id = `docker exec -i mysql_server bash -c 'cat - | mysql -utime_sheet_admin -p$test_pass -Dtime_sheet -N 2> /dev/null' << EOF 
+$employee_type_id_sql
+EOF`;
+
+}
+
+print $employee_type_id;
+
 
 # Create a test employee type for testing
 print FH "INSERT INTO `user` (`first_name`, `middle_name`,`last_name`,`address`,
     `phone_number`,`employee_type_id`,`email`,`state`
-    ) VALUES (\'test\',NULL,\'test\',\'test\',\'test\',$employee_id,`test\@test.example.com`,`state`);
+    ) VALUES (\'test\',NULL,\'test\',\'test\',\'test\',$employee_type_id,`test\@test.example.com`,`state`);
     ";
 
 print FH "\n\n";
@@ -51,7 +65,7 @@ my $i = 0;
 while ($i < $lim) {
     my $status = $i % 2 == 0 ? "'working'" :  "'left_work'";
     my $work_time = ((localtime)+ONE_HOUR*$i)->strftime("%Y-%m-%d %H:%M:%S");
-    print FH "(2,$employee_id,$work_time,$status)\n";
+    print FH "(2,$employee_type_id,$work_time,$status)\n";
     $i+=1;
 }
 
