@@ -26,7 +26,7 @@ my $test_pass="_____time_admin_pass_____";
 my $employee_type_id_sql='SELECT \`employee_type_id\` FROM \`occupation\` WHERE \`occupation_type\` = \'test\';';
 
 # SELECT employee ID & user ID for testing.
-my $employee_type_id = `docker exec -i mysql_server bash -c 'cat - | mysql -utime_sheet_admin -p$test_pass -Dtime_sheet -N ' << EOF 
+my $employee_type_id = `docker exec -i mysql_server bash -c 'cat - | mysql -utime_sheet_admin -p$test_pass -Dtime_sheet -N 2> /dev/null ' << EOF 
 $employee_type_id_sql
 EOF`;
 
@@ -46,13 +46,37 @@ EOF`;
 
 }
 
-print $employee_type_id;
+chomp $employee_type_id;
 
+my $test_user_id_sql = "SELECT user_id FROM user WHERE first_name='test' AND last_name='test';";
+
+my $user_id = `( docker exec -i mysql_server bash -c 'cat - | mysql -utime_sheet_admin -p$test_pass -Dtime_sheet -N 2> /dev/null' ) << EOF 
+$test_user_id_sql
+EOF`;
+
+if (!$user_id){
+
+    my $insert_user_sql = "INSERT INTO user (first_name, middle_name,last_name,address,
+        phone_number,employee_type_id,email,state
+        ) VALUES (\'test\',NULL,\'test\',\'test\',\'test\',$employee_type_id,'test\@test.example.com','working');
+        ";
+
+system "( docker exec -i mysql_server bash -c 'cat - | mysql -utime_sheet_admin -p$test_pass -Dtime_sheet -N 2> /dev/null' ) << EOF 
+$insert_user_sql
+EOF";
+
+$user_id = `( docker exec -i mysql_server bash -c 'cat - | mysql -utime_sheet_admin -p$test_pass -Dtime_sheet -N 2> /dev/null' ) << EOF 
+$test_user_id_sql
+EOF`;
+
+}
+
+chomp $user_id;
 
 # Create a test employee type for testing
 print FH "INSERT INTO `user` (`first_name`, `middle_name`,`last_name`,`address`,
     `phone_number`,`employee_type_id`,`email`,`state`
-    ) VALUES (\'test\',NULL,\'test\',\'test\',\'test\',$employee_type_id,`test\@test.example.com`,`state`);
+    ) VALUES (\'test\',NULL,\'test\',\'test\',\'test\',$employee_type_id,'test\@test.example.com','working');
     ";
 
 print FH "\n\n";
@@ -65,7 +89,7 @@ my $i = 0;
 while ($i < $lim) {
     my $status = $i % 2 == 0 ? "'working'" :  "'left_work'";
     my $work_time = ((localtime)+ONE_HOUR*$i)->strftime("%Y-%m-%d %H:%M:%S");
-    print FH "(2,$employee_type_id,$work_time,$status)\n";
+    print FH "($user_id,$employee_type_id,'$work_time',$status)".($i+1==$lim ? '': ',')."\n";
     $i+=1;
 }
 
