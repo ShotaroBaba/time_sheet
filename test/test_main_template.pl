@@ -85,4 +85,4 @@ close(FH);
 
 # system "cat test_sql.sql";
 
-system "cat test_sql.sql | docker exec -i mysql_server bash -c 'cat - > test_sql.sql && mysql -utime_sheet_admin -p$test_pass -Dtime_sheet -N < test_sql.sql 2> /dev/null'"; 
+system "cat test_sql.sql | docker exec -i mysql_server bash -c 'cat - > test_sql.sql && mysql -utime_sheet_admin -p$test_pass -Dtime_sheet -N < test_sql.sql'"; 

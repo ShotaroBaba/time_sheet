@@ -1,0 +1,24 @@
+image: docker:latest
+# services:
+#   - docker:dind
+
+variables:
+  DOCKER_HOST: tcp://docker:2375/
+  DOCKER_DRIVER: overlay2
+
+stages:
+  - before_build
+
+before-build:
+  stage: before_build
+  image: docker:dind
+  script:
+    - echo "build OK.";
+
+build:
+  stage: build
+  image: docker:dind
+  script:
+    - sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+    - sudo chmod +x /usr/local/bin/docker-compose
+    
