@@ -8,6 +8,7 @@ variables:
 
 stages:
   - before_build
+  - build
 
 before-build:
   stage: before_build
