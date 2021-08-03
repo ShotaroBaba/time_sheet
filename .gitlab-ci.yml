@@ -23,6 +23,8 @@ build:
     - apk update && apk add curl
     - curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
     - ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
+
+# TODO: Find a way to make this code below works somehow
 #     - chmod +x /usr/local/bin/docker-compose
 #     - /usr/local/bin/docker-compose up -d
 
